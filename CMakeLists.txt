@@ -4,8 +4,19 @@ project(matrix_compressor)
 
 find_package(blaze REQUIRED)
 
-set(MC_TAREGET_NAME ${PROJECT_NAME})
-add_library(${MC_TAREGET_NAME} sources/matrix_compressor.cpp)
+# Dependencies
+include(FetchContent)
+
+# SFCompressor
+fetchcontent_declare(
+    streamvbyte
+    GIT_REPOSITORY https://github.com/lemire/streamvbyte.git
+)
+
+fetchcontent_makeavailable(streamvbyte)
+
+set(MC_TARGET_NAME ${PROJECT_NAME})
+add_library(${MC_TARGET_NAME} sources/matrix_compressor.cpp)
 
 # Set compiler features
 target_compile_features(${MC_TARGET_NAME} PUBLIC cxx_std_17)
@@ -20,6 +31,7 @@ target_include_directories(
 )
 
 # Link dependencies
-target_link_libraries(${WB_TARGET_NAME} blaze::blaze)
+target_link_libraries(${MC_TARGET_NAME} blaze::blaze)
+target_link_libraries(${MC_TARGET_NAME} streamvbyte_static)
 
 add_subdirectory(examples)
