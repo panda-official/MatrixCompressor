@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(matrix_compressor)
 
 find_package(blaze REQUIRED)
+find_package(Catch2 REQUIRED)
 
 # Dependencies
 include(FetchContent)
@@ -38,3 +39,4 @@ target_link_libraries(${MC_TARGET_NAME} streamvbyte_static)
 target_link_libraries(${MC_TARGET_NAME} fpzip)
 
 add_subdirectory(examples)
+add_subdirectory(tests)
