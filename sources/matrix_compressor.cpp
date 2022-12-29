@@ -53,7 +53,7 @@ CompressedVector compress(const blaze::CompressedVector<float>& vector) {
   std::cout << "Compressed " << N << " floats down to " << hs + ds << " bytes."
             << std::endl;
 
-  return {indexes.size(), values.size(), compressed, compressed_values};
+  return {indexes.size(), vector.size(), compressed, compressed_values};
 }
 
 blaze::CompressedVector<float> decompress(CompressedVector& compressed) {
@@ -66,8 +66,8 @@ blaze::CompressedVector<float> decompress(CompressedVector& compressed) {
   /* Decompress values */
   std::vector<float> values;
   values.resize(compressed.size);
-  FPZ* fpz = fpzip_read_from_buffer(
-      reinterpret_cast<void*>(compressed.values.data()));
+  FPZ* fpz =
+      fpzip_read_from_buffer(reinterpret_cast<void*>(compressed.values.data()));
   fpzip_read_header(fpz);
   fpzip_read(fpz, reinterpret_cast<void*>(values.data()));
   fpzip_read_close(fpz);

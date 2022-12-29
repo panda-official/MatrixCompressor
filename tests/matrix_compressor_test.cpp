@@ -1,5 +1,7 @@
 #include <matrix_compressor/matrix_compressor.h>
 
+#include <iostream>
+
 #include <catch2/catch_test_macros.hpp>
 
 /**
@@ -59,6 +61,8 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
   auto vector = generator.GenerateSparseVector(100, 0.1);
 
   auto compressed = matrix_compressor::compress(vector);
+  CAPTURE(compressed.size);
+
   auto decompressed = matrix_compressor::decompress(compressed);
 
   REQUIRE(vector == decompressed);
