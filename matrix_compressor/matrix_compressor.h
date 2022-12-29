@@ -6,6 +6,7 @@ namespace matrix_compressor {
 
 /* Compressed vector data */
 struct CompressedVector {
+  bool is_valid{false};
   size_t nonzero{0};
   size_t size{0};
   std::vector<uint8_t> indexes;

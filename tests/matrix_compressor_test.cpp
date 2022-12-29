@@ -57,11 +57,27 @@ blaze::DynamicMatrix<float> DataGenerator::GenerateMatrix2d(size_t rows,
 }
 
 TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
+  SECTION("Empty vector") {
+    auto compressed = matrix_compressor::compress({});
+    REQUIRE_FALSE(compressed.is_valid);
+  }
+
+  SECTION("Zeros vector") {
+    auto compressed = matrix_compressor::compress({0, 0, 0, 0, 0});
+    REQUIRE_FALSE(compressed.is_valid);
+  }
+
   DataGenerator generator;
   auto vector = generator.GenerateSparseVector(100, 0.1);
 
   auto compressed = matrix_compressor::compress(vector);
-  CAPTURE(compressed.size);
+  REQUIRE(compressed.is_valid);
+
+  SECTION("Invalid compressed vector") {
+    compressed.is_valid = false;
+    auto decompressed = matrix_compressor::decompress(compressed);
+    REQUIRE(decompressed.size() == 0);
+  }
 
   auto decompressed = matrix_compressor::decompress(compressed);
 

@@ -8,6 +8,14 @@
 namespace matrix_compressor {
 
 CompressedVector compress(const blaze::CompressedVector<float>& vector) {
+  if (vector.size() == 0) {
+    return {};
+  }
+
+  if (vector.nonZeros() == 0) {
+    return {};
+  }
+
   /* Indexes */
   std::vector<uint32_t> indexes;
   indexes.reserve(vector.nonZeros());
@@ -47,16 +55,29 @@ CompressedVector compress(const blaze::CompressedVector<float>& vector) {
   fpz->ny = 1;
   fpz->nz = 1;
   fpz->nf = 1;
+
   size_t hs = fpzip_write_header(fpz);
+  if (hs == 0) {
+    return {};
+  }
+
   size_t ds = fpzip_write(fpz, reinterpret_cast<void*>(values.data()));
+  if (ds == 0) {
+    return {};
+  }
+
   fpzip_write_close(fpz);
   std::cout << "Compressed " << N << " floats down to " << hs + ds << " bytes."
             << std::endl;
 
-  return {indexes.size(), vector.size(), compressed, compressed_values};
+  return {true, indexes.size(), vector.size(), compressed, compressed_values};
 }
 
 blaze::CompressedVector<float> decompress(CompressedVector& compressed) {
+  if (!compressed.is_valid) {
+    return {};
+  }
+
   /* Decompress indexes */
   std::vector<uint32_t> indexes;
   indexes.resize(compressed.nonzero);
@@ -68,8 +89,15 @@ blaze::CompressedVector<float> decompress(CompressedVector& compressed) {
   values.resize(compressed.size);
   FPZ* fpz =
       fpzip_read_from_buffer(reinterpret_cast<void*>(compressed.values.data()));
-  fpzip_read_header(fpz);
-  fpzip_read(fpz, reinterpret_cast<void*>(values.data()));
+
+  if (fpzip_read_header(fpz) == 0) {
+    return {};
+  }
+
+  if (fpzip_read(fpz, reinterpret_cast<void*>(values.data())) == 0) {
+    return {};
+  }
+
   fpzip_read_close(fpz);
 
   /* Create vector */
