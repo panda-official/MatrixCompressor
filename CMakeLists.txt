@@ -7,13 +7,15 @@ find_package(blaze REQUIRED)
 # Dependencies
 include(FetchContent)
 
-# SFCompressor
 fetchcontent_declare(
     streamvbyte
     GIT_REPOSITORY https://github.com/lemire/streamvbyte.git
 )
 
+fetchcontent_declare(fpzip GIT_REPOSITORY https://github.com/LLNL/fpzip.git)
+
 fetchcontent_makeavailable(streamvbyte)
+fetchcontent_makeavailable(fpzip)
 
 set(MC_TARGET_NAME ${PROJECT_NAME})
 add_library(${MC_TARGET_NAME} sources/matrix_compressor.cpp)
@@ -33,5 +35,6 @@ target_include_directories(
 # Link dependencies
 target_link_libraries(${MC_TARGET_NAME} blaze::blaze)
 target_link_libraries(${MC_TARGET_NAME} streamvbyte_static)
+target_link_libraries(${MC_TARGET_NAME} fpzip)
 
 add_subdirectory(examples)
