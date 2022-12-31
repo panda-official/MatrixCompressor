@@ -25,12 +25,39 @@ class BlazeCompressor {
       CompressedVector& compressed_vector);
 
  private:
+  /**
+   * Compress indexes
+   * @param indexes input integers
+   * @param compressed output encoded data
+   * @return compressed data size in bytes
+   */
   size_t CompressIndexes(const std::vector<uint32_t>& indexes,
                          std::vector<uint8_t>& compressed);
+
+  /**
+   * Decompress indexes
+   * @param compressed input encoded data
+   * @param indexes output integers which must has length equal to original data
+   * return read data size
+   */
   size_t DecompressIndexes(const std::vector<uint8_t>& compressed,
                            std::vector<uint32_t>& indexes);
+
+  /**
+   * Compress values
+   * @param values unput floats
+   * @param compressed output encoded data
+   * @return compressed data size in bytes
+   */
   size_t CompressValues(const std::vector<float>& values,
                         std::vector<uint8_t>& compressed);
+
+  /**
+   * Decompress values
+   * @param compressed input encoded data
+   * @param values output floats which must has length equal to original data
+   * return read data size
+   */
   size_t DecompressValues(const std::vector<uint8_t>& compressed,
                           std::vector<float>& values);
 };
