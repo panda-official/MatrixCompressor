@@ -13,7 +13,25 @@ struct CompressedVector {
   std::vector<uint8_t> values;
 };
 
-CompressedVector compress(const blaze::CompressedVector<float>& vector);
-blaze::CompressedVector<float> decompress(CompressedVector& compressed);
+class BlazeCompressor {
+ public:
+  BlazeCompressor() = default;
 
+  /* Compress a blaze vector */
+  CompressedVector Compress(const blaze::CompressedVector<float>& vector);
+
+  /* Decompress a blaze vector */
+  blaze::CompressedVector<float> Decompress(
+      CompressedVector& compressed_vector);
+
+ private:
+  size_t CompressIndexes(const std::vector<uint32_t>& indexes,
+                         std::vector<uint8_t>& compressed);
+  size_t DecompressIndexes(const std::vector<uint8_t>& compressed,
+                           std::vector<uint32_t>& indexes);
+  size_t CompressValues(const std::vector<float>& values,
+                        std::vector<uint8_t>& compressed);
+  size_t DecompressValues(const std::vector<uint8_t>& compressed,
+                          std::vector<float>& values);
+};
 }  // namespace matrix_compressor

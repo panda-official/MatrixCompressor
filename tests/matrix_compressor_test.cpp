@@ -56,30 +56,81 @@ blaze::DynamicMatrix<float> DataGenerator::GenerateMatrix2d(size_t rows,
   return matrix;
 }
 
-TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
+TEST_CASE("compress()") {
   SECTION("Empty vector") {
-    auto compressed = matrix_compressor::compress({});
+    auto compressed = matrix_compressor::BlazeCompressor().Compress({});
     REQUIRE_FALSE(compressed.is_valid);
   }
 
   SECTION("Zeros vector") {
-    auto compressed = matrix_compressor::compress({0, 0, 0, 0, 0});
+    auto compressed =
+        matrix_compressor::BlazeCompressor().Compress({0, 0, 0, 0, 0});
     REQUIRE_FALSE(compressed.is_valid);
   }
 
   DataGenerator generator;
-  auto vector = generator.GenerateSparseVector(100, 0.1);
-
-  auto compressed = matrix_compressor::compress(vector);
+  auto vector = generator.GenerateSparseVector(1000, 0.1);
+  auto compressed = matrix_compressor::BlazeCompressor().Compress(vector);
   REQUIRE(compressed.is_valid);
+}
 
+TEST_CASE("decompress()") {
   SECTION("Invalid compressed vector") {
+    matrix_compressor::CompressedVector compressed;
     compressed.is_valid = false;
-    auto decompressed = matrix_compressor::decompress(compressed);
+    auto decompressed =
+        matrix_compressor::BlazeCompressor().Decompress(compressed);
     REQUIRE(decompressed.size() == 0);
   }
+}
 
-  auto decompressed = matrix_compressor::decompress(compressed);
+TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
+  DataGenerator generator;
+  auto vector = generator.GenerateSparseVector(100, 0.1);
 
-  REQUIRE(vector == decompressed);
+  auto compressed = matrix_compressor::BlazeCompressor().Compress(vector);
+  REQUIRE(compressed.is_valid);
+
+  CAPTURE(compressed.indexes.size());
+  for (auto i = 0; i < compressed.indexes.size(); i++) {
+    CAPTURE(compressed.indexes[i]);
+  }
+
+  SECTION("direct") {
+    auto decompressed =
+        matrix_compressor::BlazeCompressor().Decompress(compressed);
+
+    REQUIRE(vector == decompressed);
+  }
+
+  // SECTION("std::string") {
+  //   std::string buffer;
+  //   {
+  //     std::stringstream ss;
+  //     blaze::Archive archive(ss);
+  //
+  //     archive << compressed.nonzero << compressed.size << compressed.indexes
+  //             << compressed.values;
+  //
+  //     buffer = ss.str();
+  //   }
+  //
+  //   matrix_compressor::CompressedVector compressed2;
+  //   {
+  //     std::stringstream ss(buffer);
+  //     blaze::Archive archive(ss);
+  //
+  //     archive >> compressed2.nonzero >> compressed2.size >>
+  //         compressed2.indexes >> compressed2.values;
+  //     compressed.is_valid = true;
+  //   }
+  //   /* Print compressed2 */
+  //   CAPTURE(compressed2.nonzero);
+  //   CAPTURE(compressed2.size);
+  //   std::stringstream sd;
+  //
+  //   auto decompressed = matrix_compressor::decompress(compressed2);
+  //
+  //   REQUIRE(vector == decompressed);
+  // }
 }
