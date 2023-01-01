@@ -22,7 +22,9 @@ jobs:
     name: Check C++ format and style
     steps:
       - name: Install dependencies
-        run: pipx install cpplint~=1.6 clang-format==15.0.4
+        run: |
+          pipx install cpplint~=1.6
+          pipx install clang-format==15.0.4
       - uses: actions/checkout@v2
       - name: Run cpplint
         run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
