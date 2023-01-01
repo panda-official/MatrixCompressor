@@ -49,7 +49,8 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DWB_BUILD_TESTS=ON -DWB_BUILD_BENCHMARKS=ON -DWB_BUILD_EXAMPLES=ON -DCODE_COVERAGE=ON ..
+          conan install ..
+          cmake .. -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release --config ${{ matrix.build_type }}
           cmake --build . -j --config ${{ matrix.build_type }}
       - name: Run tests
         run: |
