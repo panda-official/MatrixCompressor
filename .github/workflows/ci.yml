@@ -47,7 +47,6 @@ jobs:
           pipx install conan==${{ env.CONAN_VERSION }}
       - name: Create profile
         run: |
-          cd conan
           conan profile new default --detect
       - name: Build tests, benchmarks and examples
         run: |
