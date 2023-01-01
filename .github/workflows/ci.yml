@@ -45,12 +45,16 @@ jobs:
       - name: Install dependencies
         run: |
           pipx install conan==${{ env.CONAN_VERSION }}
+      - name: Create profile
+        run: |
+          cd conan
+          conan profile new default --detect
       - name: Build tests, benchmarks and examples
         run: |
           mkdir build
           cd build
-          conan install ..
-          cmake .. -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release --config ${{ matrix.build_type }}
+          conan install .. -s build_type=${{ matrix.build_type }}
+          cmake .. -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           cmake --build . -j --config ${{ matrix.build_type }}
       - name: Run tests
         run: |
