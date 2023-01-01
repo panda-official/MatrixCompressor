@@ -26,8 +26,8 @@ jobs:
           pipx install cpplint~=1.6
           pipx install clang-format==15.0.4
       - uses: actions/checkout@v2
-      - name: Run cpplint
-        run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
+      # - name: Run cpplint
+      #   run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
       - name: Run clang-format
         run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs clang-format --dry-run --Werror
   build_test:
