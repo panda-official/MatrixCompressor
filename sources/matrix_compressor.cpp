@@ -87,10 +87,38 @@ CompressedMatrix BlazeCompressor::Compress(
 
   return {true,
           values.size(),
+          matrix.rows(),
           matrix.columns(),
           compressed_columns,
           compressed_rows,
           compressed_values};
+}
+
+blaze::CompressedMatrix<float> BlazeCompressor::Decompress(
+    CompressedMatrix& compressed) {
+  if (!compressed.is_valid) {
+    return {};
+  }
+
+  /* Decompress columns */
+  std::vector<uint32_t> columns;
+  columns.resize(compressed.nonzero);
+  DecompressIndexes(compressed.columns, columns);
+
+  /* Decompress rows */
+  std::vector<uint32_t> rows;
+  rows.resize(compressed.rows_number + 1);
+  DecompressIndexes(compressed.rows, rows);
+
+  /* Decompress values */
+  std::vector<float> values;
+  values.resize(compressed.nonzero);
+  DecompressValues(compressed.values, values);
+
+  /* Create matrix */
+  auto matrix = ConvertFromCSR(columns, rows, values, compressed.cols_number);
+
+  return matrix;
 }
 
 std::tuple<std::vector<uint32_t>, std::vector<uint32_t>, std::vector<float>>
@@ -128,6 +156,21 @@ BlazeCompressor::ConvertToCSR(const blaze::CompressedMatrix<float>& matrix) {
   row_indexes.push_back(i + 1);
 
   return {col_indexes, row_indexes, values};
+}
+
+blaze::CompressedMatrix<float> ConvertFromCSR(
+    const std::vector<uint32_t>& columns, const std::vector<uint32_t>& rows,
+    const std::vector<float>& values, size_t cols_number) {
+  blaze::CompressedMatrix<float> matrix(rows.size() - 1, cols_number);
+  matrix.reserve(values.size());
+  for (size_t row = 0; row < matrix.rows() - 1; ++row) {
+    for (size_t i = rows[row]; i < rows[row + 1]; ++i) {
+      matrix.append(row, columns[i], values[i]);
+    }
+    matrix.finalize(row);
+  }
+
+  return matrix;
 }
 
 size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
