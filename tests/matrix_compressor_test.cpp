@@ -27,8 +27,8 @@ class DataGenerator {
    * @param ratio non-zero elements ratio
    * @return sparse matrix
    **/
-  blaze::DynamicMatrix<float> GenerateMatrix2d(size_t rows, size_t cols,
-                                               float ratio);
+  blaze::CompressedMatrix<float> GenerateSparseMatrix(size_t rows, size_t cols,
+                                                      float ratio);
 };
 
 blaze::CompressedVector<float> DataGenerator::GenerateSparseVector(
@@ -42,10 +42,9 @@ blaze::CompressedVector<float> DataGenerator::GenerateSparseVector(
   return vector;
 }
 
-blaze::DynamicMatrix<float> DataGenerator::GenerateMatrix2d(size_t rows,
-                                                            size_t cols,
-                                                            float ratio) {
-  blaze::DynamicMatrix<float> matrix(rows, cols);
+blaze::CompressedMatrix<float> DataGenerator::GenerateSparseMatrix(
+    size_t rows, size_t cols, float ratio) {
+  blaze::CompressedMatrix<float> matrix(rows, cols);
   for (size_t i = 0; i < rows; ++i) {
     for (size_t j = 0; j < cols; ++j) {
       if (distribution_(random_engine_) < ratio) {
@@ -56,9 +55,10 @@ blaze::DynamicMatrix<float> DataGenerator::GenerateMatrix2d(size_t rows,
   return matrix;
 }
 
-TEST_CASE("compress()") {
+TEST_CASE("BlazeCompressor::Compress()", "[vector]") {
   SECTION("Empty vector") {
-    auto compressed = matrix_compressor::BlazeCompressor().Compress({});
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(
+        blaze::CompressedVector<float>{});
     REQUIRE_FALSE(compressed.is_valid);
   }
 
@@ -74,7 +74,7 @@ TEST_CASE("compress()") {
   REQUIRE(compressed.is_valid);
 }
 
-TEST_CASE("decompress()") {
+TEST_CASE("BlazeCompressor::Decompress()", "[vector]") {
   SECTION("Invalid compressed vector") {
     matrix_compressor::CompressedVector compressed;
     compressed.is_valid = false;
@@ -133,4 +133,23 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
   //
   //   REQUIRE(vector == decompressed);
   // }
+}
+
+TEST_CASE("Compress and decompress matrix", "[matrix]") {
+  DataGenerator generator;
+  auto matrix = generator.GenerateSparseMatrix(5, 10, 0.1);
+
+  auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
+  REQUIRE(compressed.is_valid);
+  CAPTURE(compressed.cols_number);
+  CAPTURE(compressed.rows_number);
+  CAPTURE(compressed.rows);
+  CAPTURE(compressed.nonzero);
+
+  SECTION("direct") {
+    auto decompressed =
+        matrix_compressor::BlazeCompressor().Decompress(compressed);
+
+    REQUIRE(matrix == decompressed);
+  }
 }
