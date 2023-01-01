@@ -21,11 +21,13 @@ jobs:
     runs-on: ubuntu-20.04
     name: Check C++ format and style
     steps:
+      - name: Install dependencies
+        run: pipx instal cpplint~=1.6 clang-format==15.0.4
       - uses: actions/checkout@v2
       - name: Run cpplint
-        run: find {benchmarks,tests,sources,wavelet_buffer,examples,python/src}/ -name "*.cc" -o -name "*.h" | xargs cpplint
+        run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
       - name: Run clang-format
-        run: find {benchmarks,tests,sources,wavelet_buffer,examples,python/src}/ -name "*.cc" -o -name "*.h" | xargs clang-format --dry-run --Werror
+        run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs clang-format --dry-run --Werror
   build_test:
     needs: [cpplint]
     runs-on: ${{ matrix.os }}
