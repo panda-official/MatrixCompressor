@@ -69,6 +69,67 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
   return vector;
 }
 
+CompressedMatrix BlazeCompressor::Compress(
+    const blaze::CompressedMatrix<float>& matrix) {
+  auto [columns, rows, values] = ConvertToCSR(matrix);
+
+  /* Compress columns */
+  std::vector<uint8_t> compressed_columns;
+  CompressIndexes(columns, compressed_columns);
+
+  /* Compress rows */
+  std::vector<uint8_t> compressed_rows;
+  CompressIndexes(rows, compressed_rows);
+
+  /* Compress values */
+  std::vector<uint8_t> compressed_values;
+  CompressValues(values, compressed_values);
+
+  return {true,
+          values.size(),
+          matrix.columns(),
+          compressed_columns,
+          compressed_rows,
+          compressed_values};
+}
+
+std::tuple<std::vector<uint32_t>, std::vector<uint32_t>, std::vector<float>>
+BlazeCompressor::ConvertToCSR(const blaze::CompressedMatrix<float>& matrix) {
+  /* Check input */
+  if (matrix.rows() == 0 || matrix.columns() == 0) {
+    return {};
+  }
+
+  if (matrix.nonZeros() == 0) {
+    return {};
+  }
+
+  /* Indexes */
+  std::vector<uint32_t> row_indexes;
+  row_indexes.reserve(matrix.rows() + 1);
+
+  std::vector<uint32_t> col_indexes;
+  col_indexes.reserve(matrix.nonZeros());
+
+  /* Values */
+  std::vector<float> values;
+  values.reserve(matrix.nonZeros());
+
+  /* Fill indexes and value */
+  size_t i = 0;
+  for (size_t row = 0; row < matrix.rows(); ++row) {
+    row_indexes.push_back(i++);
+    for (auto it = matrix.begin(row); it != matrix.end(row); ++it) {
+      col_indexes.push_back(static_cast<uint32_t>(it->index()));
+      values.push_back(it->value());
+    }
+  }
+  /* Fill last row index */
+  row_indexes.push_back(i + 1);
+
+  return {col_indexes, row_indexes, values};
+}
+
 size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
                                         std::vector<uint8_t>& compressed) {
   compressed.resize(streamvbyte_max_compressedbytes(indexes.size()));

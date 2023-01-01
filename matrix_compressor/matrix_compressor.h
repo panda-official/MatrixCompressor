@@ -6,11 +6,21 @@ namespace matrix_compressor {
 
 /* Compressed vector data */
 struct CompressedVector {
-  bool is_valid{false};
-  size_t nonzero{0};
-  size_t size{0};
-  std::vector<uint8_t> indexes;
-  std::vector<uint8_t> values;
+  bool is_valid{false};         /**< state */
+  size_t nonzero{0};            /**< number of non-zero elements */
+  size_t size{0};               /**< vector size */
+  std::vector<uint8_t> indexes; /**< encoded indexes */
+  std::vector<uint8_t> values;  /**< encoded values */
+};
+
+/* Compressed matrix data */
+struct CompressedMatrix {
+  bool is_valid{false};         /**< state */
+  size_t nonzero{0};            /**< number of non-zero elements */
+  size_t cols{0};               /**< matrix columns */
+  std::vector<uint8_t> columns; /**< encoded column indexes */
+  std::vector<uint8_t> rows;    /**< encoded row indexes */
+  std::vector<uint8_t> values;  /**< encoded values */
 };
 
 class BlazeCompressor {
@@ -32,7 +42,22 @@ class BlazeCompressor {
   blaze::CompressedVector<float> Decompress(
       CompressedVector& compressed_vector);
 
+  /**
+   * Compress a blaze::CompressedMatrix<float>
+   * @param matrix
+   * @return compressed data
+   */
+  CompressedMatrix Compress(const blaze::CompressedMatrix<float>& matrix);
+
  private:
+  /**
+   * Convert sparse matrix to CSR representation
+   * @param matrix
+   * @return CSR representation
+   */
+  std::tuple<std::vector<uint32_t>, std::vector<uint32_t>, std::vector<float>>
+  ConvertToCSR(const blaze::CompressedMatrix<float>& matrix);
+
   /**
    * Compress indexes
    * @param indexes input integers
