@@ -17,10 +17,18 @@ class BlazeCompressor {
  public:
   BlazeCompressor() = default;
 
-  /* Compress a blaze vector */
+  /**
+   * Compress a blaze::CompressedVector<float>
+   * @param vector
+   * @return compressed data
+   */
   CompressedVector Compress(const blaze::CompressedVector<float>& vector);
 
-  /* Decompress a blaze vector */
+  /**
+   * Decompress a blaze::CompressedVector<float>
+   * @param compressed compressed data
+   * @return decompressed vector
+   */
   blaze::CompressedVector<float> Decompress(
       CompressedVector& compressed_vector);
 
