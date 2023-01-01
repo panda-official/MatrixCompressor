@@ -220,7 +220,7 @@ size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
                                    compressed.size());
 
   fpz->type = FPZIP_TYPE_FLOAT;
-  fpz->prec = 22;
+  fpz->prec = 0;
   fpz->nx = N;
   fpz->ny = 1;
   fpz->nz = 1;
@@ -237,6 +237,8 @@ size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
   }
 
   fpzip_write_close(fpz);
+
+  compressed.resize(hs + ds);
 
   std::cout << "Compressed " << N << " floats down to " << hs + ds << " bytes."
             << std::endl;

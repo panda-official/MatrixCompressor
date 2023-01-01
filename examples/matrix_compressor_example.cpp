@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  std::cout << "Start compressing" << std::endl;
   auto data = BlazeCompressor().Compress(matrix);
 
   /* Print the compressed data. */
