@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(matrix_compressor)
+project(matrix_compressor VERSION 0.1.0)
 
 find_package(blaze REQUIRED)
 find_package(Catch2 REQUIRED)
@@ -18,8 +18,16 @@ fetchcontent_declare(fpzip GIT_REPOSITORY https://github.com/LLNL/fpzip.git)
 fetchcontent_makeavailable(streamvbyte)
 fetchcontent_makeavailable(fpzip)
 
+# Create target
 set(MC_TARGET_NAME ${PROJECT_NAME})
 add_library(${MC_TARGET_NAME} sources/matrix_compressor.cpp)
+
+# Add alias
+add_library(${WB_TARGET_NAME}::${WB_TARGET_NAME} ALIAS ${WB_TARGET_NAME})
+
+# Set fPIC
+set_target_properties(${WB_TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(sf_compressor PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set compiler features
 target_compile_features(${MC_TARGET_NAME} PUBLIC cxx_std_17)
