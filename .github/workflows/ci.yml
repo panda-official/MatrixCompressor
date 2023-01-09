@@ -16,38 +16,46 @@ on:
       - CHANGELOG.md
 env:
   CONAN_VERSION: 1.53.0
+
 jobs:
   cpplint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Check C++ format and style
     steps:
       - name: Install dependencies
         run: |
           pipx install cpplint~=1.6
           pipx install clang-format==15.0.4
+
       - uses: actions/checkout@v2
-      # - name: Run cpplint
-      #   run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
+
+      - name: Run cpplint
+        run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
+
       - name: Run clang-format
         run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs clang-format --dry-run --Werror
-  build_test:
+
+  build_and_test:
     needs: [cpplint]
     runs-on: ${{ matrix.os }}
-    name: Build and test C++ part
+    name: Build and test
     strategy:
       matrix:
         build_type: [Debug, Release]
-        os: [ubuntu-20.04, windows-2019, macos-12]
+        os: [ubuntu-22.04, windows-2019, macos-12]
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - name: Install dependencies
         run: |
           pipx install conan==${{ env.CONAN_VERSION }}
+
       - name: Create profile
         run: |
           conan profile new default --detect
+
       - name: Build tests, benchmarks and examples
         run: |
           mkdir build
@@ -55,6 +63,7 @@ jobs:
           conan install .. -s build_type=${{ matrix.build_type }} --build=missing
           cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           cmake --build . -j --config ${{ matrix.build_type }}
+
       - name: Run tests
         run: |
           cd build
