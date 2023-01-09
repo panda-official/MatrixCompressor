@@ -15,7 +15,7 @@ on:
       - README.md
       - CHANGELOG.md
 env:
-  CONAN_VERSION: 1.53.0
+  CONAN_VERSION: 1.56.0
 
 jobs:
   cpplint:
@@ -60,11 +60,11 @@ jobs:
         if: matrix.os == 'ubuntu-22.04'
         run: conan profile update settings.compiler.libcxx=libstdc++11 default
 
-      - name: Build tests, benchmarks and examples
+      - name: Build tests and examples
         run: |
           mkdir build
           cd build
-          conan install .. -s build_type=${{ matrix.build_type }} --build=missing
+          conan install .. -s build_type=${{ matrix.build_type }} --build=missing -pr:b=default
           cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           cmake --build . -j --config ${{ matrix.build_type }}
 
