@@ -1,10 +1,10 @@
+// Copyright 2020-2021 PANDA GmbH
+
 #include <blaze/Blaze.h>
 #include <matrix_compressor/matrix_compressor.h>
 
 #include <iostream>
 #include <random>
-
-using namespace matrix_compressor;
 
 int main(int argc, char* argv[]) {
   if (argc < 4) {
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "Start compressing" << std::endl;
-  auto data = BlazeCompressor().Compress(matrix);
+  auto data = matrix_compressor::BlazeCompressor().Compress(matrix);
 
   /* Print the compressed data. */
   std::cout << "Compresed data size:" << std::endl;

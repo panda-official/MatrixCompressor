@@ -1,3 +1,5 @@
+// Copyright 2020-2021 PANDA GmbH
+
 #include <matrix_compressor/matrix_compressor.h>
 
 #include <iostream>

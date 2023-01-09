@@ -1,3 +1,5 @@
+// Copyright 2020-2021 PANDA GmbH
+
 #include "matrix_compressor/matrix_compressor.h"
 
 #include <fpzip.h>
@@ -35,18 +37,18 @@ CompressedVector BlazeCompressor::Compress(
 
   /* Compress indexes */
   std::vector<uint8_t> compressed_indexes;
-  auto compressed_indexes_size = CompressIndexes(indexes, compressed_indexes);
+  auto compressed_indexes_size = CompressIndexes(indexes, &compressed_indexes);
 
   /* Compress values */
   std::vector<uint8_t> compressed_values;
-  auto compressed_values_size = CompressValues(values, compressed_values);
+  auto compressed_values_size = CompressValues(values, &compressed_values);
 
   return {true, indexes.size(), vector.size(), compressed_indexes,
           compressed_values};
 }
 
 blaze::CompressedVector<float> BlazeCompressor::Decompress(
-    CompressedVector& compressed) {
+    const CompressedVector& compressed) {
   if (!compressed.is_valid) {
     return {};
   }
@@ -54,12 +56,12 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
   /* Decompress indexes */
   std::vector<uint32_t> indexes;
   indexes.resize(compressed.nonzero);
-  DecompressIndexes(compressed.indexes, indexes);
+  DecompressIndexes(compressed.indexes, &indexes);
 
   /* Decompress values */
   std::vector<float> values;
   values.resize(compressed.nonzero);
-  DecompressValues(compressed.values, values);
+  DecompressValues(compressed.values, &values);
 
   /* Create vector */
   blaze::CompressedVector<float> vector(compressed.size);
@@ -87,15 +89,15 @@ CompressedMatrix BlazeCompressor::Compress(
 
   /* Compress columns */
   std::vector<uint8_t> compressed_columns;
-  CompressIndexes(columns, compressed_columns);
+  CompressIndexes(columns, &compressed_columns);
 
   /* Compress rows */
   std::vector<uint8_t> compressed_rows;
-  CompressIndexes(rows, compressed_rows);
+  CompressIndexes(rows, &compressed_rows);
 
   /* Compress values */
   std::vector<uint8_t> compressed_values;
-  CompressValues(values, compressed_values);
+  CompressValues(values, &compressed_values);
 
   return {true,
           values.size(),
@@ -107,7 +109,7 @@ CompressedMatrix BlazeCompressor::Compress(
 }
 
 blaze::CompressedMatrix<float> BlazeCompressor::Decompress(
-    CompressedMatrix& compressed) {
+    const CompressedMatrix& compressed) {
   if (!compressed.is_valid) {
     return {};
   }
@@ -115,17 +117,17 @@ blaze::CompressedMatrix<float> BlazeCompressor::Decompress(
   /* Decompress columns */
   std::vector<uint32_t> columns;
   columns.resize(compressed.nonzero);
-  DecompressIndexes(compressed.columns, columns);
+  DecompressIndexes(compressed.columns, &columns);
 
   /* Decompress rows */
   std::vector<uint32_t> rows;
   rows.resize(compressed.rows_number + 1);
-  DecompressIndexes(compressed.rows, rows);
+  DecompressIndexes(compressed.rows, &rows);
 
   /* Decompress values */
   std::vector<float> values;
   values.resize(compressed.nonzero);
-  DecompressValues(compressed.values, values);
+  DecompressValues(compressed.values, &values);
 
   /* Create matrix */
   auto matrix = ConvertFromCSR(columns, rows, values, compressed.cols_number);
@@ -187,16 +189,16 @@ blaze::CompressedMatrix<float> BlazeCompressor::ConvertFromCSR(
 }
 
 size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
-                                        std::vector<uint8_t>& compressed) {
-  compressed.resize(streamvbyte_max_compressedbytes(indexes.size()));
+                                        std::vector<uint8_t>* compressed) {
+  compressed->resize(streamvbyte_max_compressedbytes(indexes.size()));
 
   /* Compress */
   size_t compressed_size =
-      streamvbyte_encode(indexes.data(), indexes.size(), compressed.data()) +
+      streamvbyte_encode(indexes.data(), indexes.size(), compressed->data()) +
       STREAMVBYTE_PADDING;
 
   /* Trim */
-  compressed.resize(compressed_size);
+  compressed->resize(compressed_size);
 
   std::cout << "Compressed " << indexes.size() << " integers down to "
             << compressed_size << " bytes." << std::endl;
@@ -205,19 +207,19 @@ size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
 }
 
 size_t BlazeCompressor::DecompressIndexes(
-    const std::vector<uint8_t>& compressed, std::vector<uint32_t>& indexes) {
-  streamvbyte_decode(compressed.data(), indexes.data(), indexes.size());
+    const std::vector<uint8_t>& compressed, std::vector<uint32_t>* indexes) {
+  streamvbyte_decode(compressed.data(), indexes->data(), indexes->size());
   return 0;
 }
 
 size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
-                                       std::vector<uint8_t>& compressed) {
+                                       std::vector<uint8_t>* compressed) {
   size_t N = values.size();
   size_t buffer_size = sizeof(float) * N + 1024;
-  compressed.resize(buffer_size);
+  compressed->resize(buffer_size);
 
-  FPZ* fpz = fpzip_write_to_buffer(reinterpret_cast<void*>(compressed.data()),
-                                   compressed.size());
+  FPZ* fpz = fpzip_write_to_buffer(reinterpret_cast<void*>(compressed->data()),
+                                   compressed->size());
 
   fpz->type = FPZIP_TYPE_FLOAT;
   fpz->prec = 0;
@@ -238,7 +240,7 @@ size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
 
   fpzip_write_close(fpz);
 
-  compressed.resize(hs + ds);
+  compressed->resize(hs + ds);
 
   std::cout << "Compressed " << N << " floats down to " << hs + ds << " bytes."
             << std::endl;
@@ -247,7 +249,7 @@ size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
 }
 
 size_t BlazeCompressor::DecompressValues(const std::vector<uint8_t>& compressed,
-                                         std::vector<float>& values) {
+                                         std::vector<float>* values) {
   FPZ* fpz =
       fpzip_read_from_buffer(reinterpret_cast<const void*>(compressed.data()));
 
@@ -255,7 +257,7 @@ size_t BlazeCompressor::DecompressValues(const std::vector<uint8_t>& compressed,
     return {};
   }
 
-  if (fpzip_read(fpz, reinterpret_cast<void*>(values.data())) == 0) {
+  if (fpzip_read(fpz, reinterpret_cast<void*>(values->data())) == 0) {
     return {};
   }
   fpzip_read_close(fpz);

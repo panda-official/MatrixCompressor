@@ -1,6 +1,11 @@
+// Copyright 2020-2021 PANDA GmbH
+
 #pragma once
 
 #include <blaze/Blaze.h>
+
+#include <tuple>
+#include <vector>
 
 namespace matrix_compressor {
 
@@ -41,7 +46,7 @@ class BlazeCompressor {
    * @return decompressed vector
    */
   blaze::CompressedVector<float> Decompress(
-      CompressedVector& compressed_vector);
+      const CompressedVector& compressed_vector);
 
   /**
    * Compress a blaze::CompressedMatrix<float>
@@ -56,7 +61,7 @@ class BlazeCompressor {
    * @return decompressed matrix
    */
   blaze::CompressedMatrix<float> Decompress(
-      CompressedMatrix& compressed_matrix);
+      const CompressedMatrix& compressed_matrix);
 
  private:
   /**
@@ -86,7 +91,7 @@ class BlazeCompressor {
    * @return compressed data size in bytes
    */
   size_t CompressIndexes(const std::vector<uint32_t>& indexes,
-                         std::vector<uint8_t>& compressed);
+                         std::vector<uint8_t>* compressed);
 
   /**
    * Decompress indexes
@@ -95,7 +100,7 @@ class BlazeCompressor {
    * return read data size
    */
   size_t DecompressIndexes(const std::vector<uint8_t>& compressed,
-                           std::vector<uint32_t>& indexes);
+                           std::vector<uint32_t>* indexes);
 
   /**
    * Compress values
@@ -104,7 +109,7 @@ class BlazeCompressor {
    * @return compressed data size in bytes
    */
   size_t CompressValues(const std::vector<float>& values,
-                        std::vector<uint8_t>& compressed);
+                        std::vector<uint8_t>* compressed);
 
   /**
    * Decompress values
@@ -113,6 +118,6 @@ class BlazeCompressor {
    * return read data size
    */
   size_t DecompressValues(const std::vector<uint8_t>& compressed,
-                          std::vector<float>& values);
+                          std::vector<float>* values);
 };
 }  // namespace matrix_compressor
