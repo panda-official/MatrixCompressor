@@ -20,7 +20,7 @@ fetchcontent_makeavailable(fpzip)
 
 # Create target
 set(MC_TARGET_NAME ${PROJECT_NAME})
-add_library(${MC_TARGET_NAME} sources/matrix_compressor.cpp)
+add_library(${MC_TARGET_NAME} STATIC sources/matrix_compressor.cpp)
 
 # Add alias
 add_library(${MC_TARGET_NAME}::${MC_TARGET_NAME} ALIAS ${MC_TARGET_NAME})
