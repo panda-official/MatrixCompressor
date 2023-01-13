@@ -27,7 +27,10 @@ add_library(${MC_TARGET_NAME}::${MC_TARGET_NAME} ALIAS ${MC_TARGET_NAME})
 
 # Set fPIC
 set_target_properties(${MC_TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(streamvbyte PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(
+    streamvbyte_static
+    PROPERTIES POSITION_INDEPENDENT_CODE ON
+)
 set_target_properties(fpzip PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set compiler features
