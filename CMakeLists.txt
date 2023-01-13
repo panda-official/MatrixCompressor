@@ -31,7 +31,7 @@ set_target_properties(
     streamvbyte_static
     PROPERTIES POSITION_INDEPENDENT_CODE ON
 )
-set_target_properties(streamvbyte_static PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS)
+set_property(TARGET streamvbyte_static PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS)
 set_target_properties(fpzip PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set compiler features
