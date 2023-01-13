@@ -29,8 +29,9 @@ add_library(${MC_TARGET_NAME}::${MC_TARGET_NAME} ALIAS ${MC_TARGET_NAME})
 set_target_properties(${MC_TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(
     streamvbyte_static
-    PROPERTIES POSITION_INDEPENDENT_CODE ON WINDOWS_EXPORT_ALL_SYMBOLS
+    PROPERTIES POSITION_INDEPENDENT_CODE ON
 )
+set_target_properties(streamvbyte_static PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS)
 set_target_properties(fpzip PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set compiler features
