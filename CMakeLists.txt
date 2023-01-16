@@ -13,7 +13,11 @@ fetchcontent_declare(
     GIT_REPOSITORY https://github.com/lemire/streamvbyte.git
 )
 
-fetchcontent_declare(fpzip GIT_REPOSITORY https://github.com/LLNL/fpzip.git)
+fetchcontent_declare(
+    fpzip
+    GIT_REPOSITORY https://github.com/victor1234/fpzip.git
+    GIT_TAG drift-637
+)
 
 fetchcontent_makeavailable(streamvbyte)
 fetchcontent_makeavailable(fpzip)
