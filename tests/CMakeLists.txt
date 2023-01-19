@@ -1,5 +1,3 @@
-enable_testing()
-include(CTest)
 include(Catch)
 
 add_executable(unit_tests matrix_compressor_test.cpp)

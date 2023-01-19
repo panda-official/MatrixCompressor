@@ -56,4 +56,6 @@ target_link_libraries(${MC_TARGET_NAME} streamvbyte_static)
 target_link_libraries(${MC_TARGET_NAME} fpzip)
 
 add_subdirectory(examples)
+
+include(CTest)
 add_subdirectory(tests)
