@@ -58,4 +58,6 @@ target_link_libraries(${MC_TARGET_NAME} fpzip)
 add_subdirectory(examples)
 
 include(CTest)
-add_subdirectory(tests)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

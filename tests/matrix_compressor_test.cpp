@@ -146,6 +146,8 @@ TEST_CASE("Compress and decompress matrix", "[matrix]") {
   CAPTURE(compressed.cols_number);
   CAPTURE(compressed.rows_number);
   CAPTURE(compressed.rows);
+  CAPTURE(compressed.columns);
+  CAPTURE(compressed.values);
   CAPTURE(compressed.nonzero);
 
   SECTION("direct") {
