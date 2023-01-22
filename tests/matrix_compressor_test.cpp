@@ -139,19 +139,13 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
 
 TEST_CASE("Compress and decompress matrix", "[matrix]") {
   DataGenerator generator;
-  auto matrix = generator.GenerateSparseMatrix(5, 10, 0.1);
+  auto matrix = generator.GenerateSparseMatrix(500, 1000, 0.4);
 
   auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
   REQUIRE(compressed.is_valid);
-  CAPTURE(compressed.cols_number);
-  CAPTURE(compressed.rows_number);
-  CAPTURE(compressed.rows);
-  CAPTURE(compressed.columns);
-  CAPTURE(compressed.values);
-  CAPTURE(compressed.nonzero);
 
   SECTION("direct") {
-    auto decompressed =
+    blaze::CompressedMatrix<float> decompressed =
         matrix_compressor::BlazeCompressor().Decompress(compressed);
 
     REQUIRE(matrix == decompressed);

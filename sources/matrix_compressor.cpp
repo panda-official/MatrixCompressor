@@ -178,7 +178,10 @@ blaze::CompressedMatrix<float> BlazeCompressor::ConvertFromCSR(
     const std::vector<float>& values, size_t cols_number) {
   blaze::CompressedMatrix<float> matrix(rows.size() - 1, cols_number);
   matrix.reserve(values.size());
-  for (size_t row = 0; row < matrix.rows() - 1; ++row) {
+
+  /* Fill */
+  for (size_t row = 0; row < matrix.rows(); ++row) {
+    matrix.reserve(row, rows[row + 1] - rows[row]);
     for (size_t i = rows[row]; i < rows[row + 1]; ++i) {
       matrix.append(row, columns[i], values[i]);
     }
