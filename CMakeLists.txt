@@ -13,7 +13,8 @@ include(FetchContent)
 
 fetchcontent_declare(
     streamvbyte
-    GIT_REPOSITORY https://github.com/lemire/streamvbyte.git
+    GIT_REPOSITORY https://github.com/victor1234/streamvbyte.git
+    GIT_TAG drift-637
 )
 
 fetchcontent_declare(
@@ -54,9 +55,9 @@ target_include_directories(
 )
 
 # Link dependencies
-target_link_libraries(${MC_TARGET_NAME} blaze::blaze)
-target_link_libraries(${MC_TARGET_NAME} streamvbyte_static)
-target_link_libraries(${MC_TARGET_NAME} fpzip)
+target_link_libraries(${MC_TARGET_NAME} PUBLIC blaze::blaze)
+target_link_libraries(${MC_TARGET_NAME} PRIVATE streamvbyte_static)
+target_link_libraries(${MC_TARGET_NAME} PRIVATE fpzip)
 
 add_subdirectory(examples)
 
@@ -69,7 +70,10 @@ endif()
 include(GNUInstallDirs)
 
 # Create package targets file
-install(TARGETS ${MC_TARGET_NAME} EXPORT ${MC_TARGET_NAME}-target)
+install(
+    TARGETS ${MC_TARGET_NAME} streamvbyte_static
+    EXPORT ${MC_TARGET_NAME}-target
+)
 install(
     EXPORT ${MC_TARGET_NAME}-target
     FILE ${MC_TARGET_NAME}-targets.cmake
