@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(matrix_compressor VERSION 0.1.0)
 
+# Options
+option(MC_BUILD_TESTS "Build unit tests" OFF)
+
 find_package(blaze REQUIRED)
 find_package(Catch2 REQUIRED)
 
@@ -58,6 +61,6 @@ target_link_libraries(${MC_TARGET_NAME} fpzip)
 add_subdirectory(examples)
 
 include(CTest)
-if(BUILD_TESTING)
+if(MC_BUILD_TESTS)
     add_subdirectory(tests)
 endif()

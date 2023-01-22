@@ -65,7 +65,7 @@ jobs:
           mkdir build
           cd build
           conan install .. -s build_type=${{ matrix.build_type }} --build=missing -pr:b=default
-          cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DMC_BUILD_TESTS=ON
           cmake --build . -j --config ${{ matrix.build_type }}
 
       - name: Run tests
