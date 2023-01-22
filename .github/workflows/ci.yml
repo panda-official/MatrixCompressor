@@ -72,3 +72,13 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure -C ${{ matrix.build_type }}
+
+      - name: Install matrix_compressor
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          cd build
+          sudo cmake --install .
+
+      - name: Check cmake target installation
+        if: matrix.os == 'ubuntu-22.04'
+        run: cmake --find-package -DNAME=matrix_compressor -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=EXIST

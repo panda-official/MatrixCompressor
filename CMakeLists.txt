@@ -64,3 +64,45 @@ include(CTest)
 if(MC_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
+
+# Install rules
+include(GNUInstallDirs)
+
+# Create package targets file
+install(TARGETS ${MC_TARGET_NAME} EXPORT ${MC_TARGET_NAME}-target)
+install(
+    EXPORT ${MC_TARGET_NAME}-target
+    FILE ${MC_TARGET_NAME}-targets.cmake
+    NAMESPACE ${MC_TARGET_NAME}::
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake
+)
+
+include(CMakePackageConfigHelpers)
+
+# Create package config file
+configure_package_config_file(
+    "${PROJECT_SOURCE_DIR}/cmake/${MC_TARGET_NAME}-config.cmake.in"
+    "${MC_TARGET_NAME}-config.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake
+)
+# Create package version file
+write_basic_package_version_file(
+    ${MC_TARGET_NAME}-config-version.cmake
+    COMPATIBILITY ExactVersion
+)
+
+# Install cmake files
+install(
+    FILES
+        "${PROJECT_BINARY_DIR}/${MC_TARGET_NAME}-config.cmake"
+        "${PROJECT_BINARY_DIR}/${MC_TARGET_NAME}-config-version.cmake"
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake
+)
+
+# Install headers
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/matrix_compressor
+    TYPE INCLUDE
+    PATTERN "*.md"
+    EXCLUDE
+)
