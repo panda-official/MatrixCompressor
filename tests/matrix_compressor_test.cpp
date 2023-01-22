@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 /**
  * Random data generator
@@ -46,7 +47,7 @@ blaze::CompressedVector<float> DataGenerator::GenerateSparseVector(
 
 blaze::CompressedMatrix<float> DataGenerator::GenerateSparseMatrix(
     size_t rows, size_t cols, float ratio) {
-  blaze::CompressedMatrix<float> matrix(rows, cols);
+  blaze::DynamicMatrix<float> matrix = blaze::zero<float>(rows, cols);
   for (size_t i = 0; i < rows; ++i) {
     for (size_t j = 0; j < cols; ++j) {
       if (distribution_(random_engine_) < ratio) {
@@ -70,10 +71,12 @@ TEST_CASE("BlazeCompressor::Compress()", "[vector]") {
     REQUIRE_FALSE(compressed.is_valid);
   }
 
-  DataGenerator generator;
-  auto vector = generator.GenerateSparseVector(1000, 0.1);
-  auto compressed = matrix_compressor::BlazeCompressor().Compress(vector);
-  REQUIRE(compressed.is_valid);
+  SECTION("Random vector") {
+    DataGenerator generator;
+    auto vector = generator.GenerateSparseVector(1000, 0.1);
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(vector);
+    REQUIRE(compressed.is_valid);
+  }
 }
 
 TEST_CASE("BlazeCompressor::Decompress()", "[vector]") {
@@ -139,7 +142,10 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
 
 TEST_CASE("Compress and decompress matrix", "[matrix]") {
   DataGenerator generator;
-  auto matrix = generator.GenerateSparseMatrix(500, 1000, 0.4);
+  auto rows = GENERATE(10, 100, 5000);
+  auto columns = GENERATE(10, 100, 5000);
+  auto ratio = GENERATE(0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0);
+  auto matrix = generator.GenerateSparseMatrix(rows, columns, ratio);
 
   auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
   REQUIRE(compressed.is_valid);

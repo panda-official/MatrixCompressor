@@ -75,17 +75,6 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
 CompressedMatrix BlazeCompressor::Compress(
     const blaze::CompressedMatrix<float>& matrix) {
   auto [columns, rows, values] = ConvertToCSR(matrix);
-  /* print columns to file*/
-  std::ofstream file;
-  // file.open("columns.txt");
-  // for (auto& column : columns) {
-  //   file << column << std::endl;
-  // }
-  /* print rows to file*/
-  file.open("rows.txt");
-  for (auto& row : rows) {
-    file << row << std::endl;
-  }
 
   /* Compress columns */
   std::vector<uint8_t> compressed_columns;
@@ -168,7 +157,7 @@ BlazeCompressor::ConvertToCSR(const blaze::CompressedMatrix<float>& matrix) {
     }
   }
   /* Fill last row index */
-  row_indexes.push_back(i + 1);
+  row_indexes.push_back(i);
 
   return {col_indexes, row_indexes, values};
 }
