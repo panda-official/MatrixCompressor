@@ -30,10 +30,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run cpplint
-        run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs cpplint
+        run: find {tests,sources,matrix_compressor,examples,benchmarks}/ -name "*.cc" -o -name "*.h" | xargs cpplint
 
       - name: Run clang-format
-        run: find {tests,sources,matrix_compressor,examples}/ -name "*.cc" -o -name "*.h" | xargs clang-format --dry-run --Werror
+        run: find {tests,sources,matrix_compressor,examples,benchmarks}/ -name "*.cc" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
   build_and_test:
     needs: [cpplint]
@@ -65,7 +65,7 @@ jobs:
           mkdir build
           cd build
           conan install .. -s build_type=${{ matrix.build_type }} --build=missing -pr:b=default
-          cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DMC_BUILD_TESTS=ON _DMC_BUILD_EXAMPLES=ON
+          cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DMC_BUILD_TESTS=ON -DMC_BUILD_EXAMPLES=ON -DMC_BUILD_BENCHMARKS=ON
           cmake --build . -j --config ${{ matrix.build_type }}
 
       - name: Run tests

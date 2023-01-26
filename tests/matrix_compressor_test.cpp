@@ -107,37 +107,6 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
 
     REQUIRE(vector == decompressed);
   }
-
-  // SECTION("std::string") {
-  //   std::string buffer;
-  //   {
-  //     std::stringstream ss;
-  //     blaze::Archive archive(ss);
-  //
-  //     archive << compressed.nonzero << compressed.size << compressed.indexes
-  //             << compressed.values;
-  //
-  //     buffer = ss.str();
-  //   }
-  //
-  //   matrix_compressor::CompressedVector compressed2;
-  //   {
-  //     std::stringstream ss(buffer);
-  //     blaze::Archive archive(ss);
-  //
-  //     archive >> compressed2.nonzero >> compressed2.size >>
-  //         compressed2.indexes >> compressed2.values;
-  //     compressed.is_valid = true;
-  //   }
-  //   /* Print compressed2 */
-  //   CAPTURE(compressed2.nonzero);
-  //   CAPTURE(compressed2.size);
-  //   std::stringstream sd;
-  //
-  //   auto decompressed = matrix_compressor::decompress(compressed2);
-  //
-  //   REQUIRE(vector == decompressed);
-  // }
 }
 
 TEST_CASE("BlazeCompressor::Compress()", "[matrix]") {
