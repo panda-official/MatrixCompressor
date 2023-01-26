@@ -4,6 +4,7 @@ project(matrix_compressor VERSION 0.1.0)
 
 # Options
 option(MC_BUILD_TESTS "Build unit tests" OFF)
+option(MC_BUILD_EXAMPLES "Build examples" OFF)
 
 find_package(blaze REQUIRED)
 find_package(Catch2 REQUIRED)
@@ -59,7 +60,9 @@ target_link_libraries(${MC_TARGET_NAME} PUBLIC blaze::blaze)
 target_link_libraries(${MC_TARGET_NAME} PRIVATE streamvbyte_static)
 target_link_libraries(${MC_TARGET_NAME} PRIVATE fpzip)
 
-add_subdirectory(examples)
+if(MC_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 include(CTest)
 if(MC_BUILD_TESTS)
