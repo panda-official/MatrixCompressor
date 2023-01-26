@@ -1,4 +1,4 @@
-// Copyright 2020-2021 PANDA GmbH
+// Copyright 2020-2022 PANDA GmbH
 
 #include "matrix_compressor/matrix_compressor.h"
 
@@ -100,7 +100,7 @@ CompressedMatrix BlazeCompressor::Compress(
 blaze::CompressedMatrix<float> BlazeCompressor::Decompress(
     const CompressedMatrix& compressed) {
   if (!compressed.is_valid) {
-    return {};
+    throw std::invalid_argument("Invalid compressed matrix");
   }
 
   /* Decompress columns */
@@ -128,11 +128,7 @@ std::tuple<std::vector<uint32_t>, std::vector<uint32_t>, std::vector<float>>
 BlazeCompressor::ConvertToCSR(const blaze::CompressedMatrix<float>& matrix) {
   /* Check input */
   if (matrix.rows() == 0 || matrix.columns() == 0) {
-    return {};
-  }
-
-  if (matrix.nonZeros() == 0) {
-    return {};
+    throw std::invalid_argument("Matrix is empty");
   }
 
   /* Indexes */
@@ -192,10 +188,10 @@ size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
   /* Trim */
   compressed->resize(compressed_size);
 
-  std::cout << "Compressed " << indexes.size() << " integers down to "
-            << compressed_size << " bytes." << std::endl;
+  // std::cout << "Compressed " << indexes.size() << " integers down to "
+  //           << compressed_size << " bytes." << std::endl;
 
-  return 0;
+  return compressed_size;
 }
 
 size_t BlazeCompressor::DecompressIndexes(
@@ -222,20 +218,23 @@ size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
 
   size_t hs = fpzip_write_header(fpz);
   if (hs == 0) {
-    return {};
+    fpzip_write_close(fpz);
+    throw std::runtime_error(fpzip_errstr[fpzip_errno]);
   }
 
   size_t ds = fpzip_write(fpz, reinterpret_cast<const void*>(values.data()));
   if (ds == 0) {
-    return {};
+    fpzip_write_close(fpz);
+    throw std::runtime_error(fpzip_errstr[fpzip_errno]);
   }
 
   fpzip_write_close(fpz);
 
   compressed->resize(hs + ds);
 
-  std::cout << "Compressed " << N << " floats down to " << hs + ds << " bytes."
-            << std::endl;
+  // std::cout << "Compressed " << N << " floats down to " << hs + ds << "
+  // bytes."
+  //           << std::endl;
 
   return hs + ds;
 }
@@ -246,11 +245,13 @@ size_t BlazeCompressor::DecompressValues(const std::vector<uint8_t>& compressed,
       fpzip_read_from_buffer(reinterpret_cast<const void*>(compressed.data()));
 
   if (fpzip_read_header(fpz) == 0) {
-    return {};
+    fpzip_read_close(fpz);
+    throw std::runtime_error(fpzip_errstr[fpzip_errno]);
   }
 
   if (fpzip_read(fpz, reinterpret_cast<void*>(values->data())) == 0) {
-    return {};
+    fpzip_read_close(fpz);
+    throw std::runtime_error(fpzip_errstr[fpzip_errno]);
   }
   fpzip_read_close(fpz);
 

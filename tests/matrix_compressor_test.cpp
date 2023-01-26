@@ -1,4 +1,4 @@
-// Copyright 2020-2021 PANDA GmbH
+// Copyright 2020-2022 PANDA GmbH
 
 #include <matrix_compressor/matrix_compressor.h>
 
@@ -140,20 +140,57 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
   // }
 }
 
-TEST_CASE("Compress and decompress matrix", "[matrix]") {
+TEST_CASE("BlazeCompressor::Compress()", "[matrix]") {
+  SECTION("Empty matrix") {
+    auto compressor = matrix_compressor::BlazeCompressor();
+    REQUIRE_THROWS_AS(compressor.Compress(blaze::CompressedMatrix<float>{}),
+                      std::invalid_argument);
+  }
+
+  SECTION("Random matrix") {
+    DataGenerator generator;
+    auto matrix = generator.GenerateSparseMatrix(100, 100, 0.1);
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
+    REQUIRE(compressed.is_valid);
+  }
+}
+
+TEST_CASE("BlazeCompressor::Decompress()", "[matrix]") {
+  SECTION("Invalid compressed matrix") {
+    matrix_compressor::CompressedMatrix compressed;
+    compressed.is_valid = false;
+    auto bc = matrix_compressor::BlazeCompressor();
+    REQUIRE_THROWS_AS(bc.Decompress(compressed), std::invalid_argument);
+  }
+  SECTION("Random matrix") {
+    DataGenerator generator;
+    auto matrix = generator.GenerateSparseMatrix(100, 100, 0.1);
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
+
+    auto decompressed =
+        matrix_compressor::BlazeCompressor().Decompress(compressed);
+    REQUIRE(decompressed.rows() * decompressed.columns() > 0);
+  }
+}
+
+TEST_CASE("Decompressed matrix must be equal to origin", "[matrix]") {
   DataGenerator generator;
+
+  /* Define matrix parameters */
   auto rows = GENERATE(10, 100, 5000);
   auto columns = GENERATE(10, 100, 5000);
-  auto ratio = GENERATE(0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0);
+  auto ratio = GENERATE(0.0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0);
+
+  /* Generate matrix */
   auto matrix = generator.GenerateSparseMatrix(rows, columns, ratio);
 
+  /* Compress */
   auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
   REQUIRE(compressed.is_valid);
 
-  SECTION("direct") {
-    blaze::CompressedMatrix<float> decompressed =
-        matrix_compressor::BlazeCompressor().Decompress(compressed);
+  /* Decompress */
+  blaze::CompressedMatrix<float> decompressed =
+      matrix_compressor::BlazeCompressor().Decompress(compressed);
 
-    REQUIRE(matrix == decompressed);
-  }
+  REQUIRE(matrix == decompressed);
 }
