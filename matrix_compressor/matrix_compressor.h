@@ -19,7 +19,7 @@ struct ArchivedVector {
 };
 
 /* Compressed matrix data */
-struct CompressedMatrix {
+struct ArchivedMatrix {
   bool is_valid{false}; /**< state */
   size_t nonzero{0};    /**< number of non-zero elements */
   size_t rows_number{0};
@@ -53,7 +53,7 @@ class BlazeCompressor {
    * @param matrix
    * @return compressed data
    */
-  CompressedMatrix Compress(const blaze::CompressedMatrix<float>& matrix);
+  ArchivedMatrix Compress(const blaze::CompressedMatrix<float>& matrix);
 
   /**
    * Decompress a blaze::CompressedMatrix<float>
@@ -61,7 +61,7 @@ class BlazeCompressor {
    * @return decompressed matrix
    */
   blaze::CompressedMatrix<float> Decompress(
-      const CompressedMatrix& compressed_matrix);
+      const ArchivedMatrix& compressed_matrix);
 
  private:
   /**

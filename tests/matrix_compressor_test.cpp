@@ -126,7 +126,7 @@ TEST_CASE("BlazeCompressor::Compress()", "[matrix]") {
 
 TEST_CASE("BlazeCompressor::Decompress()", "[matrix]") {
   SECTION("Invalid compressed matrix") {
-    matrix_compressor::CompressedMatrix compressed;
+    matrix_compressor::ArchivedMatrix compressed;
     compressed.is_valid = false;
     auto bc = matrix_compressor::BlazeCompressor();
     REQUIRE_THROWS_AS(bc.Decompress(compressed), std::invalid_argument);

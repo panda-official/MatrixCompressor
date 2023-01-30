@@ -72,7 +72,7 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
   return vector;
 }
 
-CompressedMatrix BlazeCompressor::Compress(
+ArchivedMatrix BlazeCompressor::Compress(
     const blaze::CompressedMatrix<float>& matrix) {
   auto [columns, rows, values] = ConvertToCSR(matrix);
 
@@ -98,7 +98,7 @@ CompressedMatrix BlazeCompressor::Compress(
 }
 
 blaze::CompressedMatrix<float> BlazeCompressor::Decompress(
-    const CompressedMatrix& compressed) {
+    const ArchivedMatrix& compressed) {
   if (!compressed.is_valid) {
     throw std::invalid_argument("Invalid compressed matrix");
   }
