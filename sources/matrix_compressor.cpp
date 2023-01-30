@@ -10,7 +10,7 @@
 
 namespace matrix_compressor {
 
-CompressedVector BlazeCompressor::Compress(
+ArchivedVector BlazeCompressor::Compress(
     const blaze::CompressedVector<float>& vector) {
   /* Check input */
   if (vector.size() == 0) {
@@ -48,7 +48,7 @@ CompressedVector BlazeCompressor::Compress(
 }
 
 blaze::CompressedVector<float> BlazeCompressor::Decompress(
-    const CompressedVector& compressed) {
+    const ArchivedVector& compressed) {
   if (!compressed.is_valid) {
     return {};
   }

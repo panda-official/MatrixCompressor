@@ -10,7 +10,7 @@
 namespace matrix_compressor {
 
 /* Compressed vector data */
-struct CompressedVector {
+struct ArchivedVector {
   bool is_valid{false};         /**< state */
   size_t nonzero{0};            /**< number of non-zero elements */
   size_t size{0};               /**< vector size */
@@ -38,7 +38,7 @@ class BlazeCompressor {
    * @param vector
    * @return compressed data
    */
-  CompressedVector Compress(const blaze::CompressedVector<float>& vector);
+  ArchivedVector Compress(const blaze::CompressedVector<float>& vector);
 
   /**
    * Decompress a blaze::CompressedVector<float>
@@ -46,7 +46,7 @@ class BlazeCompressor {
    * @return decompressed vector
    */
   blaze::CompressedVector<float> Decompress(
-      const CompressedVector& compressed_vector);
+      const ArchivedVector& compressed_vector);
 
   /**
    * Compress a blaze::CompressedMatrix<float>

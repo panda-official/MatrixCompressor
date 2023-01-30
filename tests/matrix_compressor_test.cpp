@@ -81,7 +81,7 @@ TEST_CASE("BlazeCompressor::Compress()", "[vector]") {
 
 TEST_CASE("BlazeCompressor::Decompress()", "[vector]") {
   SECTION("Invalid compressed vector") {
-    matrix_compressor::CompressedVector compressed;
+    matrix_compressor::ArchivedVector compressed;
     compressed.is_valid = false;
     auto decompressed =
         matrix_compressor::BlazeCompressor().Decompress(compressed);
