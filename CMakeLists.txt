@@ -16,7 +16,7 @@ include(FetchContent)
 fetchcontent_declare(
     streamvbyte
     GIT_REPOSITORY https://github.com/victor1234/streamvbyte.git
-    GIT_TAG drift-637
+    GIT_TAG reduce-libs-number
 )
 
 fetchcontent_declare(
