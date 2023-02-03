@@ -37,11 +37,7 @@ add_library(${MC_TARGET_NAME}::${MC_TARGET_NAME} ALIAS ${MC_TARGET_NAME})
 
 # Set fPIC
 set_target_properties(${MC_TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(
-    streamvbyte_static
-    PROPERTIES POSITION_INDEPENDENT_CODE ON
-)
-set_property(TARGET streamvbyte_static PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS)
+set_target_properties(streamvbyte PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(fpzip PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Set compiler features
@@ -58,7 +54,7 @@ target_include_directories(
 
 # Link dependencies
 target_link_libraries(${MC_TARGET_NAME} PUBLIC blaze::blaze)
-target_link_libraries(${MC_TARGET_NAME} PRIVATE streamvbyte_static)
+target_link_libraries(${MC_TARGET_NAME} PRIVATE streamvbyte)
 target_link_libraries(${MC_TARGET_NAME} PRIVATE fpzip)
 
 if(MC_BUILD_EXAMPLES)
@@ -81,10 +77,7 @@ endif()
 include(GNUInstallDirs)
 
 # Create package targets file
-install(
-    TARGETS ${MC_TARGET_NAME} streamvbyte_static
-    EXPORT ${MC_TARGET_NAME}-target
-)
+install(TARGETS ${MC_TARGET_NAME} streamvbyte EXPORT ${MC_TARGET_NAME}-target)
 install(
     EXPORT ${MC_TARGET_NAME}-target
     FILE ${MC_TARGET_NAME}-targets.cmake
