@@ -35,8 +35,8 @@ class BlazeCompressor {
   /**
    * Compress a blaze::CompressedVector<float>
    * @param vector
-   * @param precision number of bits for each float 0 -max precision, 1 - 1
-   * bit,32 - 32 bits
+   * @param precision number of bits for each float 0 -max precision, 2 - 2
+   * bits,32 - 32 bits
    * @return compressed data
    */
   ArchivedVector Compress(const blaze::CompressedVector<float>& vector,
@@ -53,8 +53,8 @@ class BlazeCompressor {
   /**
    * Compress a blaze::CompressedMatrix<float>
    * @param matrix
-   * @param precision number of bits for each float 0 -max precision, 1 - 1
-   * bit,32 - 32 bits
+   * @param precision number of bits for each float 0 -max precision, 2 - 2
+   * bita,32 - 32 bits
    * @return compressed data
    */
   ArchivedMatrix Compress(const blaze::CompressedMatrix<float>& matrix,
