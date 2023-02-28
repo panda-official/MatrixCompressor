@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## Added:
+
+- Precision for float compression, [PR-3](https://github.com/panda-official/MatrixCompressor/pull/3)
+
+## Changed:
+
+- Optimized index compression, [PR-3](https://github.com/panda-official/MatrixCompressor/pull/3)
+
 ## 0.1.0 - 2023-02-28
 
 ### Added
