@@ -51,7 +51,7 @@ blaze::CompressedMatrix<float> ConvertFromCSR(
     auto col = indexes[i] % compressed.cols_number;
 
     if (row > last_row) {
-      for  (size_t j = last_row; j < row; ++j) {
+      for (size_t j = last_row; j < row; ++j) {
         // we can jump few rows but have to finalize each
         matrix.finalize(j);
       }

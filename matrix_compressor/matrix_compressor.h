@@ -24,7 +24,7 @@ struct ArchivedMatrix {
   size_t nonzero{0};    /**< number of non-zero elements */
   size_t rows_number{0};
   size_t cols_number{0};        /**< matrix columns */
-  std::vector<uint8_t> indexes;    /**< encoded  indexes */
+  std::vector<uint8_t> indexes; /**< encoded  indexes */
   std::vector<uint8_t> values;  /**< encoded values */
 };
 
