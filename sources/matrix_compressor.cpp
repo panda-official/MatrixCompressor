@@ -6,7 +6,6 @@
 #include <streamvbyte.h>
 #include <streamvbytedelta.h>
 
-
 #include <iostream>
 
 namespace matrix_compressor {
@@ -29,7 +28,8 @@ std::tuple<std::vector<uint32_t>, std::vector<float>> ConvertToCSR(
   /* Fill indexes and value */
   for (size_t row = 0; row < matrix.rows(); ++row) {
     for (auto it = matrix.begin(row); it != matrix.end(row); ++it) {
-      indexes.push_back(static_cast<uint32_t>(it->index() * row));
+      indexes.push_back(
+          static_cast<uint32_t>(it->index() + row * matrix.columns()));
       values.push_back(it->value());
     }
   }
@@ -45,12 +45,24 @@ blaze::CompressedMatrix<float> ConvertFromCSR(
   matrix.reserve(values.size());
 
   /* Fill */
-  for (auto row = 0; row < compressed.rows_number; ++row) {
-    matrix.reserve(row, compressed.cols_number);
-    for (auto col = 0; col < compressed.cols_number; ++col) {
+  size_t last_row = 0;
+  for (size_t i = 0; i < indexes.size(); ++i) {
+    auto row = indexes[i] / compressed.cols_number;
+    auto col = indexes[i] % compressed.cols_number;
+
+    if (row > last_row) {
+      for  (size_t j = last_row; j < row; ++j) {
+        // we can jump few rows but have to finalize each
+        matrix.finalize(j);
+      }
+      matrix.reserve(row, compressed.cols_number);
+      last_row = row;
     }
-    matrix.finalize(row);
+
+    matrix.append(row, col, values[i]);
   }
+
+  matrix.finalize(last_row);
   return matrix;
 }
 
@@ -85,7 +97,8 @@ ArchivedVector BlazeCompressor::Compress(
 
   /* Compress values */
   std::vector<uint8_t> compressed_values;
-  auto compressed_values_size = CompressValues(values, &compressed_values, precision);
+  auto compressed_values_size =
+      CompressValues(values, &compressed_values, precision);
 
   return {true, indexes.size(), vector.size(), compressed_indexes,
           compressed_values};
@@ -116,7 +129,8 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
   return vector;
 }
 
-ArchivedMatrix BlazeCompressor::Compress(const blaze::CompressedMatrix<float>& matrix, int precision) {
+ArchivedMatrix BlazeCompressor::Compress(
+    const blaze::CompressedMatrix<float>& matrix, int precision) {
   auto [indexes, values] = ConvertToCSR(matrix);
 
   ArchivedMatrix archived_matrix{
@@ -160,7 +174,8 @@ size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
 
   /* Compress */
   size_t compressed_size =
-      streamvbyte_delta_encode(indexes.data(), indexes.size(), compressed->data(), 0) +
+      streamvbyte_delta_encode(indexes.data(), indexes.size(),
+                               compressed->data(), 0) +
       STREAMVBYTE_PADDING;
 
   /* Trim */
@@ -174,12 +189,14 @@ size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
 
 size_t BlazeCompressor::DecompressIndexes(
     const std::vector<uint8_t>& compressed, std::vector<uint32_t>* indexes) {
-  streamvbyte_delta_decode(compressed.data(), indexes->data(), indexes->size(), 0);
+  streamvbyte_delta_decode(compressed.data(), indexes->data(), indexes->size(),
+                           0);
   return 0;
 }
 
 size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
-                                       std::vector<uint8_t>* compressed, int precision) {
+                                       std::vector<uint8_t>* compressed,
+                                       int precision) {
   size_t N = values.size();
   size_t buffer_size = sizeof(float) * N + 1024;
   compressed->resize(buffer_size);
