@@ -24,8 +24,7 @@ struct ArchivedMatrix {
   size_t nonzero{0};    /**< number of non-zero elements */
   size_t rows_number{0};
   size_t cols_number{0};        /**< matrix columns */
-  std::vector<uint8_t> columns; /**< encoded column indexes */
-  std::vector<uint8_t> rows;    /**< encoded row indexes */
+  std::vector<uint8_t> indexes;    /**< encoded  indexes */
   std::vector<uint8_t> values;  /**< encoded values */
 };
 
@@ -64,26 +63,6 @@ class BlazeCompressor {
       const ArchivedMatrix& compressed_matrix);
 
  private:
-  /**
-   * Convert sparse matrix to CSR representation
-   * @param matrix
-   * @return CSR representation
-   */
-  std::tuple<std::vector<uint32_t>, std::vector<uint32_t>, std::vector<float>>
-  ConvertToCSR(const blaze::CompressedMatrix<float>& matrix);
-
-  /**
-   * Convert from CSR
-   * @param columns
-   * @param rows
-   * @param values
-   * @param cols_number
-   * @return sparse matrix
-   */
-  blaze::CompressedMatrix<float> ConvertFromCSR(
-      const std::vector<uint32_t>& columns, const std::vector<uint32_t>& rows,
-      const std::vector<float>& values, size_t cols_number);
-
   /**
    * Compress indexes
    * @param indexes input integers
