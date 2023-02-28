@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 ![example workflow](https://github.com/panda-official/MatrixCompressor/actions/workflows/ci.yml/badge.svg)
 
 # MatrixCompressor
