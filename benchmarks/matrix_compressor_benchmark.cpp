@@ -31,11 +31,11 @@ TEST_CASE("BlazeCompressor") {
 
   BENCHMARK("BlazeCompressor::Compress(), ratio=" + std::to_string(ratio)) {
     auto data =
-        matrix_compressor::BlazeCompressor().Compress(compressed_matrix);
+        matrix_compressor::BlazeCompressor().Compress(compressed_matrix, 0);
     return data;
   };
 
-  auto data = matrix_compressor::BlazeCompressor().Compress(compressed_matrix);
+  auto data = matrix_compressor::BlazeCompressor().Compress(compressed_matrix, 0);
   BENCHMARK("BlazeCompressor::Decompress(), ratio=" + std::to_string(ratio)) {
     auto decompressed_matrix =
         matrix_compressor::BlazeCompressor().Decompress(data);

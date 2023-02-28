@@ -24,8 +24,7 @@ struct ArchivedMatrix {
   size_t nonzero{0};    /**< number of non-zero elements */
   size_t rows_number{0};
   size_t cols_number{0};        /**< matrix columns */
-  std::vector<uint8_t> columns; /**< encoded column indexes */
-  std::vector<uint8_t> rows;    /**< encoded row indexes */
+  std::vector<uint8_t> indexes; /**< encoded  indexes */
   std::vector<uint8_t> values;  /**< encoded values */
 };
 
@@ -36,9 +35,12 @@ class BlazeCompressor {
   /**
    * Compress a blaze::CompressedVector<float>
    * @param vector
+   * @param precision number of bits for each float 0 -max precision, 2 - 2
+   * bits,32 - 32 bits
    * @return compressed data
    */
-  ArchivedVector Compress(const blaze::CompressedVector<float>& vector);
+  ArchivedVector Compress(const blaze::CompressedVector<float>& vector,
+                          int precision);
 
   /**
    * Decompress a blaze::CompressedVector<float>
@@ -51,9 +53,12 @@ class BlazeCompressor {
   /**
    * Compress a blaze::CompressedMatrix<float>
    * @param matrix
+   * @param precision number of bits for each float 0 -max precision, 2 - 2
+   * bita,32 - 32 bits
    * @return compressed data
    */
-  ArchivedMatrix Compress(const blaze::CompressedMatrix<float>& matrix);
+  ArchivedMatrix Compress(const blaze::CompressedMatrix<float>& matrix,
+                          int precision);
 
   /**
    * Decompress a blaze::CompressedMatrix<float>
@@ -64,26 +69,6 @@ class BlazeCompressor {
       const ArchivedMatrix& compressed_matrix);
 
  private:
-  /**
-   * Convert sparse matrix to CSR representation
-   * @param matrix
-   * @return CSR representation
-   */
-  std::tuple<std::vector<uint32_t>, std::vector<uint32_t>, std::vector<float>>
-  ConvertToCSR(const blaze::CompressedMatrix<float>& matrix);
-
-  /**
-   * Convert from CSR
-   * @param columns
-   * @param rows
-   * @param values
-   * @param cols_number
-   * @return sparse matrix
-   */
-  blaze::CompressedMatrix<float> ConvertFromCSR(
-      const std::vector<uint32_t>& columns, const std::vector<uint32_t>& rows,
-      const std::vector<float>& values, size_t cols_number);
-
   /**
    * Compress indexes
    * @param indexes input integers
@@ -106,10 +91,11 @@ class BlazeCompressor {
    * Compress values
    * @param values unput floats
    * @param compressed output encoded data
+   * @param precision number of bits for each float
    * @return compressed data size in bytes
    */
   size_t CompressValues(const std::vector<float>& values,
-                        std::vector<uint8_t>* compressed);
+                        std::vector<uint8_t>* compressed, int precision);
 
   /**
    * Decompress values

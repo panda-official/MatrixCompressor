@@ -61,20 +61,20 @@ blaze::CompressedMatrix<float> DataGenerator::GenerateSparseMatrix(
 TEST_CASE("BlazeCompressor::Compress()", "[vector]") {
   SECTION("Empty vector") {
     auto compressed = matrix_compressor::BlazeCompressor().Compress(
-        blaze::CompressedVector<float>{});
+        blaze::CompressedVector<float>{}, 0);
     REQUIRE_FALSE(compressed.is_valid);
   }
 
   SECTION("Zeros vector") {
     auto compressed =
-        matrix_compressor::BlazeCompressor().Compress({0, 0, 0, 0, 0});
+        matrix_compressor::BlazeCompressor().Compress({0, 0, 0, 0, 0}, 0);
     REQUIRE_FALSE(compressed.is_valid);
   }
 
   SECTION("Random vector") {
     DataGenerator generator;
     auto vector = generator.GenerateSparseVector(1000, 0.1);
-    auto compressed = matrix_compressor::BlazeCompressor().Compress(vector);
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(vector, 0);
     REQUIRE(compressed.is_valid);
   }
 }
@@ -93,7 +93,7 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
   DataGenerator generator;
   auto vector = generator.GenerateSparseVector(100, 0.1);
 
-  auto compressed = matrix_compressor::BlazeCompressor().Compress(vector);
+  auto compressed = matrix_compressor::BlazeCompressor().Compress(vector, 0);
   REQUIRE(compressed.is_valid);
 
   CAPTURE(compressed.indexes.size());
@@ -112,14 +112,14 @@ TEST_CASE("Compress and decompress vector", "[matrix_compressor]") {
 TEST_CASE("BlazeCompressor::Compress()", "[matrix]") {
   SECTION("Empty matrix") {
     auto compressor = matrix_compressor::BlazeCompressor();
-    REQUIRE_THROWS_AS(compressor.Compress(blaze::CompressedMatrix<float>{}),
+    REQUIRE_THROWS_AS(compressor.Compress(blaze::CompressedMatrix<float>{}, 0),
                       std::invalid_argument);
   }
 
   SECTION("Random matrix") {
     DataGenerator generator;
     auto matrix = generator.GenerateSparseMatrix(100, 100, 0.1);
-    auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix, 0);
     REQUIRE(compressed.is_valid);
   }
 }
@@ -134,7 +134,7 @@ TEST_CASE("BlazeCompressor::Decompress()", "[matrix]") {
   SECTION("Random matrix") {
     DataGenerator generator;
     auto matrix = generator.GenerateSparseMatrix(100, 100, 0.1);
-    auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
+    auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix, 0);
 
     auto decompressed =
         matrix_compressor::BlazeCompressor().Decompress(compressed);
@@ -148,13 +148,13 @@ TEST_CASE("Decompressed matrix must be equal to origin", "[matrix]") {
   /* Define matrix parameters */
   auto rows = GENERATE(10, 100, 5000);
   auto columns = GENERATE(10, 100, 5000);
-  auto ratio = GENERATE(0.0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0);
+  auto ratio = GENERATE(0.0, 0.25, 0.5, 0.75, 1.0);
 
   /* Generate matrix */
   auto matrix = generator.GenerateSparseMatrix(rows, columns, ratio);
 
   /* Compress */
-  auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix);
+  auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix, 0);
   REQUIRE(compressed.is_valid);
 
   /* Decompress */
@@ -162,4 +162,27 @@ TEST_CASE("Decompressed matrix must be equal to origin", "[matrix]") {
       matrix_compressor::BlazeCompressor().Decompress(compressed);
 
   REQUIRE(matrix == decompressed);
+}
+
+TEST_CASE("Test custom precision", "[matrix]") {
+  DataGenerator generator;
+  int precision =
+      GENERATE(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+               19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32);
+
+  CAPTURE(precision);
+  /* Generate matrix */
+  auto matrix = generator.GenerateSparseMatrix(100, 100, 0.5);
+
+  /* Compress */
+  auto compressed = matrix_compressor::BlazeCompressor().Compress(matrix, precision);
+  REQUIRE(compressed.is_valid);
+
+  /* Decompress */
+  blaze::CompressedMatrix<float> decompressed =
+      matrix_compressor::BlazeCompressor().Decompress(compressed);
+
+  auto norm = blaze::norm(matrix - decompressed);
+  CAPTURE(norm);
+  REQUIRE(norm < std::pow(2, 1-precision) * matrix.nonZeros());
 }

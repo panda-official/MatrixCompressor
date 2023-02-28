@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
   std::default_random_engine random_engine_;
   std::uniform_real_distribution<float> distribution_{0, 1};
 
-  blaze::DynamicMatrix<float> matrix = blaze::zero<float>(rows, cols);
+  blaze::CompressedMatrix<float> matrix = blaze::zero<float>(rows, cols);
   for (size_t i = 0; i < rows; ++i) {
     for (size_t j = 0; j < cols; ++j) {
       if (distribution_(random_engine_) < ratio) {
@@ -30,24 +30,26 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "Start compressing" << std::endl;
-  auto data = matrix_compressor::BlazeCompressor().Compress(matrix);
+  auto data = matrix_compressor::BlazeCompressor().Compress(matrix, 16);
 
   /* Print the compressed data. */
   std::cout << "Compresed data size relative to CSR, in bytes:" << std::endl;
-  std::cout << data.rows.size() << "/"
-            << (data.rows_number + 1) * sizeof(uint32_t) << std::endl;
-  std::cout << data.columns.size() << "/" << data.nonzero * sizeof(uint32_t)
+  std::cout << data.indexes.size() << "/" << data.nonzero * sizeof(uint64_t)
             << std::endl;
   std::cout << data.values.size() << "/" << data.nonzero * sizeof(float)
             << std::endl;
 
-  size_t compressed_size =
-      data.rows.size() + data.columns.size() + data.values.size();
-  size_t csr_size = (data.nonzero + data.rows_number + 1) * sizeof(uint32_t) +
-                    data.nonzero * sizeof(float);
+  std::stringstream ss;
+  blaze::Archive archive(ss);
+  archive << matrix;
 
-  std::cout << "Total: " << compressed_size << "/" << csr_size << ", "
-            << 100 * compressed_size / csr_size << "%" << std::endl;
+  auto blaze_matrix_size = static_cast<double>(ss.str().size());
+  auto compressed_size = static_cast<double>(
+      data.indexes.size() + data.values.size());
 
+  std::cout << "Blaze matrix size, in bytes:" << ss.str().size() << std::endl;
+  std::cout << "Compressed size, in bytes:" << compressed_size << std::endl;
+  std::cout << "Compression ratio:" <<  compressed_size / blaze_matrix_size
+            << std::endl;
   return EXIT_SUCCESS;
 }

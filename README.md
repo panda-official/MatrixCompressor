@@ -18,32 +18,14 @@ Compression library to compress sparse matrices
 
 ## Build and Installing
 
-On Ubuntu:
 
 ```
 git clone https://github.com/panda-official/MatrixCompressor.git
-
-mkdir build && cd build
-cmake -DMC_BUILD_TESTS=ON -DMC_BUILD_BENCHMARKS=ON -DMC_BUILD_EXAMPLES=ON ..
-cmake --build . --target install
-```
-
-On MacOS:
-
-```
-git clone https://github.com/panda-official/MatrixCompressor.git
-mkdir build && cd build
-cmake -DMC_BUILD_TESTS=ON -DMC_BUILD_BENCHMARKS=ON -DMC_BUILD_EXAMPLES=ON ..
-cmake --build . --target install
-```
-
-On Windows:
-
-```
-git clone https://github.com/panda-official/MatrixCompressor.git
-mkdir build && cd build
-cmake -DMC_BUILD_TESTS=ON -DMC_BUILD_BENCHMARKS=ON -DMC_BUILD_EXAMPLES=ON ..
-cmake --build . --config Release --target install
+mkdir build
+cd build
+conan install .. -s build_type=Release --build=missing
+cmake .. -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j --config Release
 ```
 
 ## Integration
@@ -60,3 +42,4 @@ target_link_libraries(program matrix_compressor::matrix_compressor)
 
 - (streamvbyte)[https://github.com/victor1234/streamvbyte]
 - (fpzip)[https://github.com/victor1234/fpzip]
+
