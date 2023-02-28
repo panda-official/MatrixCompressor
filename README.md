@@ -1,6 +1,7 @@
 ![example workflow](https://github.com/panda-official/MatrixCompressor/actions/workflows/ci.yml/badge.svg)
 
 # MatrixCompressor
+
 Compression library to compress sparse matrices
 
 ## Features
@@ -56,5 +57,6 @@ target_link_libraries(program matrix_compressor::matrix_compressor)
 ```
 
 ## References
-(streamvbyte)[https://github.com/victor1234/streamvbyte]
-(fpzip)[https://github.com/victor1234/fpzip]
+
+- (streamvbyte)[https://github.com/victor1234/streamvbyte]
+- (fpzip)[https://github.com/victor1234/fpzip]
