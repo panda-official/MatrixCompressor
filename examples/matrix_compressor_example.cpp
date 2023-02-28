@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "Start compressing" << std::endl;
-  auto data = matrix_compressor::BlazeCompressor().Compress(matrix);
+  auto data = matrix_compressor::BlazeCompressor().Compress(matrix, 16);
 
   /* Print the compressed data. */
   std::cout << "Compresed data size relative to CSR, in bytes:" << std::endl;

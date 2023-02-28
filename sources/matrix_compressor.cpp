@@ -4,8 +4,9 @@
 
 #include <fpzip.h>
 #include <streamvbyte.h>
+#include <streamvbytedelta.h>
 
-#include <fstream>
+
 #include <iostream>
 
 namespace matrix_compressor {
@@ -54,7 +55,7 @@ blaze::CompressedMatrix<float> ConvertFromCSR(
 }
 
 ArchivedVector BlazeCompressor::Compress(
-    const blaze::CompressedVector<float>& vector) {
+    const blaze::CompressedVector<float>& vector, int precision) {
   /* Check input */
   if (vector.size() == 0) {
     return {};
@@ -84,7 +85,7 @@ ArchivedVector BlazeCompressor::Compress(
 
   /* Compress values */
   std::vector<uint8_t> compressed_values;
-  auto compressed_values_size = CompressValues(values, &compressed_values);
+  auto compressed_values_size = CompressValues(values, &compressed_values, precision);
 
   return {true, indexes.size(), vector.size(), compressed_indexes,
           compressed_values};
@@ -115,8 +116,7 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
   return vector;
 }
 
-ArchivedMatrix BlazeCompressor::Compress(
-    const blaze::CompressedMatrix<float>& matrix) {
+ArchivedMatrix BlazeCompressor::Compress(const blaze::CompressedMatrix<float>& matrix, int precision) {
   auto [indexes, values] = ConvertToCSR(matrix);
 
   ArchivedMatrix archived_matrix{
@@ -127,7 +127,7 @@ ArchivedMatrix BlazeCompressor::Compress(
 
   /* Compress values */
   std::vector<uint8_t> compressed_values;
-  CompressValues(values, &archived_matrix.values);
+  CompressValues(values, &archived_matrix.values, precision);
 
   return archived_matrix;
 }
@@ -160,7 +160,7 @@ size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
 
   /* Compress */
   size_t compressed_size =
-      streamvbyte_encode(indexes.data(), indexes.size(), compressed->data()) +
+      streamvbyte_delta_encode(indexes.data(), indexes.size(), compressed->data(), 0) +
       STREAMVBYTE_PADDING;
 
   /* Trim */
@@ -174,12 +174,12 @@ size_t BlazeCompressor::CompressIndexes(const std::vector<uint32_t>& indexes,
 
 size_t BlazeCompressor::DecompressIndexes(
     const std::vector<uint8_t>& compressed, std::vector<uint32_t>* indexes) {
-  streamvbyte_decode(compressed.data(), indexes->data(), indexes->size());
+  streamvbyte_delta_decode(compressed.data(), indexes->data(), indexes->size(), 0);
   return 0;
 }
 
 size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
-                                       std::vector<uint8_t>* compressed) {
+                                       std::vector<uint8_t>* compressed, int precision) {
   size_t N = values.size();
   size_t buffer_size = sizeof(float) * N + 1024;
   compressed->resize(buffer_size);
@@ -188,7 +188,7 @@ size_t BlazeCompressor::CompressValues(const std::vector<float>& values,
                                    compressed->size());
 
   fpz->type = FPZIP_TYPE_FLOAT;
-  fpz->prec = 0;
+  fpz->prec = precision;
   fpz->nx = N;
   fpz->ny = 1;
   fpz->nz = 1;
