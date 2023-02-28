@@ -9,4 +9,4 @@
 
 ### Fixed
 
-- Use patched `streamvbyte` without _static prefix, [PR-2](https://github.com/panda-official/MatrixCompressor/pull/2)
+- Use patched `streamvbyte` without _static suffix, [PR-2](https://github.com/panda-official/MatrixCompressor/pull/2)
