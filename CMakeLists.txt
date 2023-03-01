@@ -8,7 +8,7 @@ option(MC_BUILD_EXAMPLES "Build examples" OFF)
 option(MC_BUILD_BENCHMARKS "Build benchmarks" OFF)
 
 find_package(blaze REQUIRED)
-find_package(Catch2 3 REQUIRED)
+find_package(Catch2 REQUIRED)
 
 # Dependencies
 include(FetchContent)
