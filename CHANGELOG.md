@@ -9,6 +9,7 @@
 ## Changed:
 
 - Optimized index compression, [PR-3](https://github.com/panda-official/MatrixCompressor/pull/3)
+- Use dense Blaze containers, [PR-4](https://github.com/panda-official/MatrixCompressor/pull/4)
 
 ## 0.1.0 - 2023-02-28
 
