@@ -44,7 +44,7 @@ blaze::DynamicMatrix<float> ConvertFromCSR(const std::vector<uint32_t>& indexes,
                                            const std::vector<float>& values,
                                            const ArchivedMatrix& compressed) {
   blaze::DynamicMatrix<float> matrix(compressed.rows_number,
-                                     compressed.cols_number, 0.0f:);
+                                     compressed.cols_number, 0.0f);
 
   /* Fill */
   for (size_t i = 0; i < indexes.size(); ++i) {
