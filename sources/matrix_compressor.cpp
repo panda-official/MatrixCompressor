@@ -18,14 +18,12 @@ std::tuple<std::vector<uint32_t>, std::vector<float>> ConvertToCSR(
   }
 
   /* Indexes */
-  const auto non_zeros = matrix.nonZeros();
-
   std::vector<uint32_t> indexes;
-  indexes.reserve(non_zeros);
+  indexes.reserve(matrix.columns() * matrix.rows() / 2);
 
   /* Values */
   std::vector<float> values;
-  values.reserve(non_zeros);
+  values.reserve(matrix.columns() * matrix.rows() / 2);
 
   /* Fill indexes and value */
   for (auto i = 0; i < matrix.rows(); ++i) {
@@ -64,17 +62,13 @@ ArchivedVector BlazeCompressor::Compress(
     return {};
   }
 
-  if (vector.nonZeros() == 0) {
-    return {};
-  }
-
   /* Indexes */
   std::vector<uint32_t> indexes;
-  indexes.reserve(vector.nonZeros());
+  indexes.reserve(vector.size() / 2);
 
   /* Values */
   std::vector<float> values;
-  values.reserve(vector.nonZeros());
+  values.reserve(vector.size() / 2);
 
   /* Fill indexes and value */
   for (auto i = 0; i < vector.size(); ++i) {
@@ -82,6 +76,10 @@ ArchivedVector BlazeCompressor::Compress(
       indexes.push_back(static_cast<uint32_t>(i));
       values.push_back(vector[i]);
     }
+  }
+
+  if (indexes.empty()) {
+    return {};
   }
 
   /* Compress indexes */
