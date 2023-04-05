@@ -2,11 +2,14 @@
 
 ## Unreleased
 
-## Added:
+## 0.2.0 - 2021-04-05
+
+
+### Added:
 
 - Precision for float compression, [PR-3](https://github.com/panda-official/MatrixCompressor/pull/3)
 
-## Changed:
+### Changed:
 
 - Optimized index compression, [PR-3](https://github.com/panda-official/MatrixCompressor/pull/3)
 - Use dense Blaze containers, [PR-4](https://github.com/panda-official/MatrixCompressor/pull/4)

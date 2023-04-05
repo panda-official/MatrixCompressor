@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(matrix_compressor VERSION 0.1.0)
+project(matrix_compressor VERSION 0.2.0)
 
 # Options
 option(MC_BUILD_TESTS "Build unit tests" OFF)
