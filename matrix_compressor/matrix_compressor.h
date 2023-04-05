@@ -33,39 +33,39 @@ class BlazeCompressor {
   BlazeCompressor() = default;
 
   /**
-   * Compress a blaze::CompressedVector<float>
+   * Compress a blaze::DynamicVector<float>
    * @param vector
    * @param precision number of bits for each float 0 -max precision, 2 - 2
    * bits,32 - 32 bits
    * @return compressed data
    */
-  ArchivedVector Compress(const blaze::CompressedVector<float>& vector,
+  ArchivedVector Compress(const blaze::DynamicVector<float>& vector,
                           int precision);
 
   /**
-   * Decompress a blaze::CompressedVector<float>
+   * Decompress a blaze::DynamicVector<float>
    * @param compressed compressed data
    * @return decompressed vector
    */
-  blaze::CompressedVector<float> Decompress(
+  blaze::DynamicVector<float> Decompress(
       const ArchivedVector& compressed_vector);
 
   /**
-   * Compress a blaze::CompressedMatrix<float>
+   * Compress a blaze::DynamicMatrix<float>
    * @param matrix
    * @param precision number of bits for each float 0 -max precision, 2 - 2
    * bita,32 - 32 bits
    * @return compressed data
    */
-  ArchivedMatrix Compress(const blaze::CompressedMatrix<float>& matrix,
+  ArchivedMatrix Compress(const blaze::DynamicMatrix<float>& matrix,
                           int precision);
 
   /**
-   * Decompress a blaze::CompressedMatrix<float>
+   * Decompress a blaze::DynamicVector<float>
    * @param compressed compressed data
    * @return decompressed matrix
    */
-  blaze::CompressedMatrix<float> Decompress(
+  blaze::DynamicMatrix<float> Decompress(
       const ArchivedMatrix& compressed_matrix);
 
  private:

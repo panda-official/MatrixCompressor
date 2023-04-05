@@ -11,7 +11,7 @@
 namespace matrix_compressor {
 
 std::tuple<std::vector<uint32_t>, std::vector<float>> ConvertToCSR(
-    const blaze::CompressedMatrix<float>& matrix) {
+    const blaze::DynamicMatrix<float>& matrix) {
   /* Check input */
   if (matrix.rows() == 0 || matrix.columns() == 0) {
     throw std::invalid_argument("Matrix is empty");
@@ -19,76 +19,67 @@ std::tuple<std::vector<uint32_t>, std::vector<float>> ConvertToCSR(
 
   /* Indexes */
   std::vector<uint32_t> indexes;
-  indexes.reserve(matrix.nonZeros());
+  indexes.reserve(matrix.columns() * matrix.rows() / 2);
 
   /* Values */
   std::vector<float> values;
-  values.reserve(matrix.nonZeros());
+  values.reserve(matrix.columns() * matrix.rows() / 2);
 
   /* Fill indexes and value */
-  for (size_t row = 0; row < matrix.rows(); ++row) {
-    for (auto it = matrix.begin(row); it != matrix.end(row); ++it) {
-      indexes.push_back(
-          static_cast<uint32_t>(it->index() + row * matrix.columns()));
-      values.push_back(it->value());
+  for (auto i = 0; i < matrix.rows(); ++i) {
+    for (auto j = 0; j < matrix.columns(); ++j) {
+      if (matrix(i, j) != 0) {
+        indexes.push_back(static_cast<uint32_t>(i * matrix.columns() + j));
+        values.push_back(matrix(i, j));
+      }
     }
   }
 
   return {indexes, values};
 }
 
-blaze::CompressedMatrix<float> ConvertFromCSR(
-    const std::vector<uint32_t>& indexes, const std::vector<float>& values,
-    const ArchivedMatrix& compressed) {
-  blaze::CompressedMatrix<float> matrix(compressed.rows_number,
-                                        compressed.cols_number);
-  matrix.reserve(values.size());
+blaze::DynamicMatrix<float> ConvertFromCSR(const std::vector<uint32_t>& indexes,
+                                           const std::vector<float>& values,
+                                           const ArchivedMatrix& compressed) {
+  blaze::DynamicMatrix<float> matrix(compressed.rows_number,
+                                     compressed.cols_number, 0.0f);
 
   /* Fill */
-  size_t last_row = 0;
   for (size_t i = 0; i < indexes.size(); ++i) {
     auto row = indexes[i] / compressed.cols_number;
     auto col = indexes[i] % compressed.cols_number;
 
-    if (row > last_row) {
-      for (size_t j = last_row; j < row; ++j) {
-        // we can jump few rows but have to finalize each
-        matrix.finalize(j);
-      }
-      matrix.reserve(row, compressed.cols_number);
-      last_row = row;
-    }
-
-    matrix.append(row, col, values[i]);
+    matrix(row, col) = values[i];
   }
 
-  matrix.finalize(last_row);
   return matrix;
 }
 
 ArchivedVector BlazeCompressor::Compress(
-    const blaze::CompressedVector<float>& vector, int precision) {
+    const blaze::DynamicVector<float>& vector, int precision) {
   /* Check input */
   if (vector.size() == 0) {
     return {};
   }
 
-  if (vector.nonZeros() == 0) {
-    return {};
-  }
-
   /* Indexes */
   std::vector<uint32_t> indexes;
-  indexes.reserve(vector.nonZeros());
+  indexes.reserve(vector.size() / 2);
 
   /* Values */
   std::vector<float> values;
-  values.reserve(vector.nonZeros());
+  values.reserve(vector.size() / 2);
 
   /* Fill indexes and value */
-  for (auto it = vector.begin(); it != vector.end(); ++it) {
-    indexes.push_back(static_cast<uint32_t>(it->index()));
-    values.push_back(it->value());
+  for (auto i = 0; i < vector.size(); ++i) {
+    if (vector[i] != 0) {
+      indexes.push_back(static_cast<uint32_t>(i));
+      values.push_back(vector[i]);
+    }
+  }
+
+  if (indexes.empty()) {
+    return {};
   }
 
   /* Compress indexes */
@@ -104,7 +95,7 @@ ArchivedVector BlazeCompressor::Compress(
           compressed_values};
 }
 
-blaze::CompressedVector<float> BlazeCompressor::Decompress(
+blaze::DynamicVector<float> BlazeCompressor::Decompress(
     const ArchivedVector& compressed) {
   if (!compressed.is_valid) {
     return {};
@@ -121,7 +112,7 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
   DecompressValues(compressed.values, &values);
 
   /* Create vector */
-  blaze::CompressedVector<float> vector(compressed.size);
+  blaze::DynamicVector<float> vector(compressed.size, 0.0f);
   for (size_t i = 0; i < compressed.nonzero; ++i) {
     vector[indexes[i]] = values[i];
   }
@@ -130,7 +121,7 @@ blaze::CompressedVector<float> BlazeCompressor::Decompress(
 }
 
 ArchivedMatrix BlazeCompressor::Compress(
-    const blaze::CompressedMatrix<float>& matrix, int precision) {
+    const blaze::DynamicMatrix<float>& matrix, int precision) {
   auto [indexes, values] = ConvertToCSR(matrix);
 
   ArchivedMatrix archived_matrix{
@@ -146,7 +137,7 @@ ArchivedMatrix BlazeCompressor::Compress(
   return archived_matrix;
 }
 
-blaze::CompressedMatrix<float> BlazeCompressor::Decompress(
+blaze::DynamicMatrix<float> BlazeCompressor::Decompress(
     const ArchivedMatrix& compressed) {
   if (!compressed.is_valid) {
     throw std::invalid_argument("Invalid compressed matrix");
